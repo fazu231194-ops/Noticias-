@@ -1,0 +1,52 @@
+[
+  {
+    "id": "1",
+    "title": "Avance tecnológico revoluciona la inteligencia artificial este año",
+    "summary": "Nuevos modelos de lenguaje integran capacidades autónomas mejoradas que optimizan procesos digitales cotidianos.",
+    "content": "Los desarrolladores de software han implementado actualizaciones masivas que permiten una interacción más fluida y natural. Este cambio promete transformar la manera en que los usuarios interactúan con las plataformas digitales diariamente, reduciendo tiempos de espera y automatizando tareas complejas en segundos.",
+    "source": "TechDaily",
+    "date": "2026-03-30",
+    "category": "Tecnología",
+    "imageUrl": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "id": "2",
+    "title": "Tendencias globales en el desarrollo web moderno sin servidores",
+    "summary": "El auge de las arquitecturas estáticas en redes de borde optimiza la velocidad de carga en portales informativos.",
+    "content": "Las plataformas de alojamiento estático combinadas con automatizaciones en repositorios se han convertido en la opción preferida por los creadores digitales. Esto permite mantener sitios web rápidos, seguros y completamente libres de mantenimiento de servidores tradicionales.",
+    "source": "WebNews Global",
+    "date": "2026-03-30",
+    "category": "Desarrollo",
+    "imageUrl": "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "id": "3",
+    "title": "Mercados regionales cierran la semana con señales de estabilidad",
+    "summary": "Los principales índices mostraron leves subas impulsadas por el sector energético y financiero.",
+    "content": "Analistas destacan que la menor volatilidad responde a expectativas moderadas sobre tasas de interés. Las empresas exportadoras registraron mejoras en sus balances trimestrales, mientras los inversores minoristas mantienen una postura cautelosa frente a los próximos anuncios económicos.",
+    "source": "Economía Hoy",
+    "date": "2026-03-29",
+    "category": "Economía",
+    "imageUrl": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "id": "4",
+    "title": "Ciudades apuestan por corredores verdes y movilidad sustentable",
+    "summary": "Nuevos planes urbanos priorizan bicicletas, transporte eléctrico y espacios públicos arbolados.",
+    "content": "Diversos municipios presentaron proyectos para reducir emisiones y mejorar la calidad del aire. Las iniciativas incluyen ciclovías conectadas, flotas de buses eléctricos y la recuperación de terrenos ociosos como parques, con participación activa de los vecinos en el diseño.",
+    "source": "Planeta Urbano",
+    "date": "2026-03-28",
+    "category": "Sociedad",
+    "imageUrl": "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "id": "5",
+    "title": "Final electrizante corona al nuevo campeón del torneo continental",
+    "summary": "Un gol en tiempo de descuento definió un partido intenso ante un estadio colmado.",
+    "content": "El encuentro mantuvo la paridad durante noventa minutos hasta que una jugada colectiva rompió el empate. El entrenador celebró el compromiso del plantel y dedicó el título a la afición que acompañó al equipo durante toda la competencia.",
+    "source": "Deportes Total",
+    "date": "2026-03-27",
+    "category": "Deportes",
+    "imageUrl": "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=800&q=80"
+  }
+]
