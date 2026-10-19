@@ -4,17 +4,28 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Panorama Global News</title>
+    <style>
+      /* Estilo para limitar el tamaño del anuncio y que no se vea gigante */
+      .ad-container {
+        max-width: 728px;
+        margin: 15px auto;
+        text-align: center;
+        overflow: hidden;
+      }
+    </style>
   </head>
   <body>
-    <!-- Anuncio Superior: NativeBanner -->
-    <script async="async" data-cfasync="false" src="https://bicea.org/21/21de0a8baa1437d84682cf330b7889ed"></script>
-    <div id="container-21de0a8baa1437d84682cf330b7889ed"></div>
-
-    <!-- AQUÍ SE CARGAN TUS NOTICIAS -->
+    <!-- TUS NOTICIAS PRIMERO -->
     <div id="root"></div>
     <script type="module" src="/src/inicio.ts"></script>
 
-    <!-- Anuncio Flotante: SocialBar -->
+    <!-- ANUNCIO CON TAMAÑO CONTROLADO -->
+    <div class="ad-container">
+      <script async="async" data-cfasync="false" src="https://bicea.org/21/21de0a8baa1437d84682cf330b7889ed"></script>
+      <div id="container-21de0a8baa1437d84682cf330b7889ed"></div>
+    </div>
+
+    <!-- Anuncio Flotante -->
     <script data-cfasync="false" src="https://bicea.org/14/7407b6388827262e778f1786a78df1a8"></script>
   </body>
 </html>
