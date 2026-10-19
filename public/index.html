@@ -4,23 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Panorama Global News</title>
-    <style>
-      /* Estilo para limitar el tamaño del anuncio y que no se vea gigante */
-      .ad-container {
-        max-width: 728px;
-        margin: 15px auto;
-        text-align: center;
-        overflow: hidden;
-      }
-    </style>
   </head>
   <body>
-    <!-- TUS NOTICIAS PRIMERO -->
+    <!-- 1. TUS NOTICIAS PRIMERO Y BIEN VISIBLES -->
     <div id="root"></div>
     <script type="module" src="/src/inicio.ts"></script>
 
-    <!-- ANUNCIO CON TAMAÑO CONTROLADO -->
-    <div class="ad-container">
+    <!-- 2. EL ANUNCIO NATIVO HASTA ABAJO -->
+    <div style="margin-top: 40px; text-align: center;">
       <script async="async" data-cfasync="false" src="https://bicea.org/21/21de0a8baa1437d84682cf330b7889ed"></script>
       <div id="container-21de0a8baa1437d84682cf330b7889ed"></div>
     </div>
