@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 
-const BANNER_SRC = "https://bicea.org/21/21de0a8baa1437d84682cf330b7889ed";
-const BANNER_CONTAINER_ID = "container-21de0a8baa1437d84682cf330b7889ed";
-const EXTRA_SRC = "https://bicea.org/14/7407b6388827262e778f1786a78df1a8";
+const BANNER_SRC = "https://bicea.org/21/fe8dc58d1842344ff43260addfa91f0a";
+const BANNER_CONTAINER_ID = "container-fe8dc58d1842344ff43260addfa91f0a";
+const EXTRA_SRC = "https://bicea.org/14/14c4ff326d0c794d7937b57fdb418c2f";
 
 function addScript(src: string, async: boolean) {
   if (document.querySelector(`script[src="${src}"]`)) return;
