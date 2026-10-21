@@ -4,6 +4,7 @@ import json
 import os
 import re
 import sys
+import time
 import calendar
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
@@ -14,16 +15,25 @@ import google.generativeai as genai
 
 # Configuración de la IA (Gemini)
 API_KEY = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+MODELO_IA = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 if API_KEY:
     genai.configure(api_key=API_KEY)
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel(MODELO_IA)
 else:
     model = None
 
 NEWS_FILE_PATH = "src/data/news.json"
 MAX_NOTICIAS = 300
-POR_FUENTE = 10
+POR_FUENTE = 2
 HORAS_MAXIMAS = 48
+
+# Límites para el plan gratuito de Gemini
+MAX_IA_POR_EJECUCION = 40
+PAUSA_ENTRE_LLAMADAS = 7  # segundos
+REINTENTOS_IA = 3
+MAX_FALLOS_SEGUIDOS = 3
+
+estado_ia = {"llamadas": 0, "fallos_seguidos": 0}
 
 UTC = timezone.utc
 ZONA_AR = timezone(timedelta(hours=-3))
@@ -150,30 +160,38 @@ def obtener_contenido_completo(url):
 
 
 def redactar_con_ia(titulo, contenido_base):
-    """Reescribe y extiende el artículo utilizando la IA para que no sea corto."""
-    if not model:
-        return contenido_base
-
+    """Reescribe el artículo con Gemini. Devuelve None si la IA falla."""
     prompt = f"""
     Eres un periodista profesional. Reescribe la siguiente noticia por completo creando un artículo informativo amplio, profesional y detallado.
-    
+
     REGLAS DE REDACCIÓN:
+    - Redacta SIEMPRE en español.
     - Redacta un artículo periodístico completo de entre 3 y 5 párrafos bien desarrollados.
     - No hagas un resumen corto ni te limites a un par de frases.
     - Utiliza un tono periodístico neutral y atrayente.
+    - Devuelve solo el texto del artículo, sin títulos ni comentarios adicionales.
 
     Título original: {titulo}
     Contenido base de la noticia:
-    {contenido_base}
+    {contenido_base[:8000]}
     """
-    try:
-        response = model.generate_content(prompt)
-        if response and response.text:
-            return response.text
-    except Exception as e:
-        print(f"Error al generar con IA: {e}")
 
-    return contenido_base
+    for intento in range(1, REINTENTOS_IA + 1):
+        if estado_ia["llamadas"] > 0:
+            time.sleep(PAUSA_ENTRE_LLAMADAS)
+        estado_ia["llamadas"] += 1
+        try:
+            response = model.generate_content(prompt)
+            texto = (response.text or "").strip() if response else ""
+            if texto:
+                estado_ia["fallos_seguidos"] = 0
+                return texto
+        except Exception as e:
+            print(f"Error al generar con IA (intento {intento}/{REINTENTOS_IA}): {e}")
+            time.sleep(20 * intento)
+
+    estado_ia["fallos_seguidos"] += 1
+    return None
 
 
 def cargar_noticias():
@@ -228,6 +246,11 @@ def ejecutar():
     ahora = datetime.now(UTC)
     limite = ahora - timedelta(hours=HORAS_MAXIMAS)
 
+    if model:
+        print(f"IA activada: {MODELO_IA}")
+    else:
+        print("ATENCIÓN: no hay clave de Gemini; se guardarán los textos originales.")
+
     anteriores = cargar_noticias()
     noticias = []
     urls = set()
@@ -257,8 +280,12 @@ def ejecutar():
 
     nuevas = 0
     fallos = 0
+    detener = False
 
     for feed_url, categoria in RSS_FEEDS:
+        if detener:
+            break
+
         try:
             feed = feedparser.parse(
                 feed_url,
@@ -297,14 +324,30 @@ def ejecutar():
             if identificador in ids:
                 continue
 
-            # 1. Extraer el texto completo de la noticia original con trafilatura
+            # 1. Extraer el texto completo de la noticia original
             texto_crudo = obtener_contenido_completo(enlace) or resumen_rss or titulo
 
-            # 2. Redactar el artículo completo mediante la IA
-            contenido_redactado = redactar_con_ia(titulo, texto_crudo)
+            # 2. Redactar el artículo con la IA
+            if model:
+                if (
+                    estado_ia["llamadas"] >= MAX_IA_POR_EJECUCION
+                    or estado_ia["fallos_seguidos"] >= MAX_FALLOS_SEGUIDOS
+                ):
+                    print("Se alcanzó el límite de la IA en esta ejecución; el resto queda para la próxima.")
+                    detener = True
+                    break
 
-            # Generar un resumen corto para la vista previa
-            resumen_corto = limpiar_html(contenido_redactado)[:300] + "..." if len(contenido_redactado) > 300 else contenido_redactado
+                contenido_redactado = redactar_con_ia(titulo, texto_crudo)
+                if not contenido_redactado:
+                    # No se guarda: se reintentará en la próxima ejecución
+                    print(f"IA falló para: {titulo[:80]}")
+                    continue
+            else:
+                contenido_redactado = texto_crudo
+
+            # Resumen corto para la vista previa
+            texto_limpio = limpiar_html(contenido_redactado)
+            resumen_corto = texto_limpio[:300] + "..." if len(texto_limpio) > 300 else texto_limpio
 
             noticia = {
                 "id": identificador,
@@ -330,7 +373,11 @@ def ejecutar():
     noticias.sort(key=lambda noticia: noticia.get("publishedAt", ""), reverse=True)
     guardar_noticias(noticias[:MAX_NOTICIAS])
 
-    print(f"Proceso terminado: {nuevas} noticias nuevas; {min(len(noticias), MAX_NOTICIAS)} guardadas.")
+    print(
+        f"Proceso terminado: {nuevas} noticias nuevas; "
+        f"{min(len(noticias), MAX_NOTICIAS)} guardadas; "
+        f"{estado_ia['llamadas']} llamadas a la IA."
+    )
 
 
 if __name__ == "__main__":
