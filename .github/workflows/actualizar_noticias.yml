@@ -33,7 +33,7 @@ jobs:
       - name: Obtener noticias RSS
         env:
           GEMINI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          GEMINI_MODEL: gemini-2.5-flash
+             GEMINI_MODEL: gemini-3.8-flash
         run: python scripts/fetch_news.py
 
       - name: Guardar noticias actualizadas
