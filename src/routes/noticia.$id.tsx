@@ -114,4 +114,28 @@ function Detail() {
         </p>
         <ShareButtons id={n.id} title={n.title} />
         {n.imageUrl && <img src={n.imageUrl} alt={n.title} className="mt-2 w-full aspect-[16/9] object-cover" />}
-        <div className="mt-6 whitespace-pre-line text-lg leading-relaxed
+        <div className="mt-6 whitespace-pre-line text-lg leading-relaxed first-letter:float-left first-letter:mr-2 first-letter:font-display first-letter:text-6xl first-letter:font-black first-letter:leading-none">
+          {n.content}
+        </div>
+        <ShareButtons id={n.id} title={n.title} />
+        {n.sourceUrl && (
+          <p className="mt-6 border-t border-border pt-4 text-sm">
+            Fuente original: <a href={n.sourceUrl} target="_blank" rel="noopener noreferrer" className="font-semibold underline underline-offset-4">Leer la noticia completa en {n.source}</a>
+          </p>
+        )}
+        <AdBanner />
+      </article>
+      <section className="mx-auto max-w-3xl px-4 pb-12">
+        <h2 className="border-b-2 border-foreground pb-1 font-display text-xl font-bold">Más noticias</h2>
+        <ul className="mt-4 divide-y divide-border">
+          {related.map((r) => (
+            <li key={r.id} className="py-3">
+              <Link to="/noticia/$id" params={{ id: r.id }} className="font-semibold hover:underline">{r.title}</Link>
+              <p className="text-xs text-muted-foreground">{r.category} · {formatDate(r.date)}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  );
+}
