@@ -54,6 +54,5 @@ jobs:
           git commit -m "Actualizar noticias RSS"
 
           git fetch origin main
-          git rebase origin/main
-
+          git rebase -X theirs origin/main
           git push origin main
