@@ -3,7 +3,6 @@ import html
 import json
 import os
 import re
-import sys
 import time
 import calendar
 from datetime import datetime, timedelta, timezone
@@ -15,7 +14,7 @@ import google.generativeai as genai
 
 # Configuración de la IA (Gemini)
 API_KEY = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
-MODELO_IA = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+MODELO_IA = os.environ.get("GEMINI_MODEL", "gemini-3.8-flash")
 if API_KEY:
     genai.configure(api_key=API_KEY)
     model = genai.GenerativeModel(MODELO_IA)
@@ -26,6 +25,7 @@ NEWS_FILE_PATH = "src/data/news.json"
 MAX_NOTICIAS = 300
 POR_FUENTE = 2
 HORAS_MAXIMAS = 48
+MIN_TEXTO_BASE = 200  # caracteres mínimos para considerar que hay una noticia
 
 # Límites para el plan gratuito de Gemini
 MAX_IA_POR_EJECUCION = 40
@@ -77,10 +77,7 @@ RSS_FEEDS = [
     ("https://www.sciencedaily.com/rss/all.xml", "Ciencia"),
 ]
 
-CATEGORIAS = {
-    "Tecnología", "Desarrollo", "Tendencias", "Economía",
-    "Sociedad", "Deportes", "Mundo", "Ciencia"
-}
+CATEGORIAS_VALIDAS = {"Mundo", "Sociedad", "Economía", "Tecnología", "Deportes", "Ciencia"}
 
 FUENTES_DEMO = {
     "techdaily",
@@ -97,6 +94,32 @@ FRASES_DEMO = (
     "ciudades apuestan por corredores verdes",
     "final electrizante corona al nuevo campeón",
 )
+
+PROMPT = """Sos un editor de un portal de noticias en español.
+A partir del TEXTO BASE, escribí una nota NUEVA con tus propias palabras.
+
+REGLAS:
+- Escribí siempre en español neutro, aunque el texto base esté en otro idioma.
+- No copies frases del texto base: no repitas más de 6 palabras seguidas. Cambiá la estructura de las oraciones.
+- Usá solo datos que estén en el texto base. No inventes cifras, nombres ni citas.
+- No uses comillas salvo para una declaración textual muy breve (máximo 12 palabras).
+- Extensión del artículo: entre 120 y 200 palabras, en 2 o 3 párrafos separados por una línea en blanco.
+- Ignorá menús, publicidad, enlaces a otras notas, "minutos de lectura" y textos de videos.
+- Si el texto base no contiene una noticia real (solo menús, un video o contenido vacío), devolvé "articulo" vacío.
+
+Elegí "categoria" entre: Mundo, Sociedad, Economía, Tecnología, Deportes, Ciencia.
+
+Devolvé SOLO un JSON con estas claves:
+{"titulo": "título en español, máximo 120 caracteres, con tus palabras",
+ "resumen": "1 o 2 oraciones, máximo 200 caracteres",
+ "categoria": "una de las categorías",
+ "articulo": "el texto de la nota"}
+
+TÍTULO ORIGINAL: __TITULO__
+
+TEXTO BASE:
+__TEXTO__
+"""
 
 
 def limpiar_html(texto):
@@ -147,7 +170,7 @@ def imagen_de_entrada(entry):
 
 
 def obtener_contenido_completo(url):
-    """Descarga la noticia original y extrae todo su texto limpio."""
+    """Descarga la noticia original y extrae el texto limpio (solo para que la IA lo lea)."""
     try:
         downloaded = trafilatura.fetch_url(url)
         if downloaded:
@@ -159,33 +182,37 @@ def obtener_contenido_completo(url):
     return None
 
 
+def texto_util(texto):
+    """Descarta textos vacíos o con restos de menús de video."""
+    if not texto or len(texto) < MIN_TEXTO_BASE:
+        return False
+    if texto.startswith("Watch CBS News"):
+        return False
+    return True
+
+
 def redactar_con_ia(titulo, contenido_base):
-    """Reescribe el artículo con Gemini. Devuelve None si la IA falla."""
-    prompt = f"""
-    Eres un periodista profesional. Reescribe la siguiente noticia por completo creando un artículo informativo amplio, profesional y detallado.
-
-    REGLAS DE REDACCIÓN:
-    - Redacta SIEMPRE en español.
-    - Redacta un artículo periodístico completo de entre 3 y 5 párrafos bien desarrollados.
-    - No hagas un resumen corto ni te limites a un par de frases.
-    - Utiliza un tono periodístico neutral y atrayente.
-    - Devuelve solo el texto del artículo, sin títulos ni comentarios adicionales.
-
-    Título original: {titulo}
-    Contenido base de la noticia:
-    {contenido_base[:8000]}
-    """
+    """Pide a Gemini una nota nueva en JSON. Devuelve un dict, o None si la IA falla."""
+    prompt = PROMPT.replace("__TITULO__", titulo).replace("__TEXTO__", contenido_base[:6000])
 
     for intento in range(1, REINTENTOS_IA + 1):
         if estado_ia["llamadas"] > 0:
             time.sleep(PAUSA_ENTRE_LLAMADAS)
         estado_ia["llamadas"] += 1
         try:
-            response = model.generate_content(prompt)
+            response = model.generate_content(
+                prompt,
+                generation_config={
+                    "response_mime_type": "application/json",
+                    "temperature": 0.4,
+                },
+            )
             texto = (response.text or "").strip() if response else ""
-            if texto:
+            texto = re.sub(r"^```(?:json)?\s*|\s*```$", "", texto)
+            datos = json.loads(texto)
+            if isinstance(datos, dict):
                 estado_ia["fallos_seguidos"] = 0
-                return texto
+                return datos
         except Exception as e:
             print(f"Error al generar con IA (intento {intento}/{REINTENTOS_IA}): {e}")
             time.sleep(20 * intento)
@@ -249,7 +276,7 @@ def ejecutar():
     if model:
         print(f"IA activada: {MODELO_IA}")
     else:
-        print("ATENCIÓN: no hay clave de Gemini; se guardarán los textos originales.")
+        print("ATENCIÓN: no hay clave de Gemini; no se guardarán noticias nuevas.")
 
     anteriores = cargar_noticias()
     noticias = []
@@ -280,7 +307,7 @@ def ejecutar():
 
     nuevas = 0
     fallos = 0
-    detener = False
+    detener = model is None  # sin IA no se agrega nada nuevo
 
     for feed_url, categoria in RSS_FEEDS:
         if detener:
@@ -324,47 +351,58 @@ def ejecutar():
             if identificador in ids:
                 continue
 
-            # 1. Extraer el texto completo de la noticia original
+            # 1. Leer el texto original (solo para que la IA lo use de base)
             texto_crudo = obtener_contenido_completo(enlace) or resumen_rss or titulo
+            if not texto_util(texto_crudo):
+                print(f"Sin texto útil, se omite: {titulo[:80]}")
+                continue
 
-            # 2. Redactar el artículo con la IA
-            if model:
-                if (
-                    estado_ia["llamadas"] >= MAX_IA_POR_EJECUCION
-                    or estado_ia["fallos_seguidos"] >= MAX_FALLOS_SEGUIDOS
-                ):
-                    print("Se alcanzó el límite de la IA en esta ejecución; el resto queda para la próxima.")
-                    detener = True
-                    break
+            # 2. Límites de la IA en esta ejecución
+            if (
+                estado_ia["llamadas"] >= MAX_IA_POR_EJECUCION
+                or estado_ia["fallos_seguidos"] >= MAX_FALLOS_SEGUIDOS
+            ):
+                print("Se alcanzó el límite de la IA en esta ejecución; el resto queda para la próxima.")
+                detener = True
+                break
 
-                contenido_redactado = redactar_con_ia(titulo, texto_crudo)
-                if not contenido_redactado:
-                    # No se guarda: se reintentará en la próxima ejecución
-                    print(f"IA falló para: {titulo[:80]}")
-                    continue
-            else:
-                contenido_redactado = texto_crudo
+            # 3. Redactar una nota nueva con la IA
+            datos = redactar_con_ia(titulo, texto_crudo)
+            if not datos:
+                print(f"IA falló para: {titulo[:80]}")
+                continue
 
-            # Resumen corto para la vista previa
-            texto_limpio = limpiar_html(contenido_redactado)
-            resumen_corto = texto_limpio[:300] + "..." if len(texto_limpio) > 300 else texto_limpio
+            articulo = re.sub(r"<[^>]+>", "", str(datos.get("articulo") or "")).strip()
+            if len(articulo) < 200:
+                print(f"La IA no encontró una noticia real, se omite: {titulo[:80]}")
+                continue
+
+            titulo_final = limpiar_html(str(datos.get("titulo") or "")) or titulo
+            resumen_corto = limpiar_html(str(datos.get("resumen") or ""))
+            if not resumen_corto:
+                resumen_corto = limpiar_html(articulo)[:200] + "..."
+
+            cat = str(datos.get("categoria") or "").strip()
+            if cat not in CATEGORIAS_VALIDAS:
+                cat = categoria
 
             noticia = {
                 "id": identificador,
-                "title": titulo[:300],
-                "summary": resumen_corto[:1000],
-                "content": contenido_redactado[:6000],
+                "title": titulo_final[:300],
+                "summary": resumen_corto[:300],
+                "content": articulo[:4000],
                 "source": limpiar_html(feed.feed.get("title", "Fuente RSS"))[:100],
                 "sourceUrl": enlace,
                 "date": fecha.astimezone(ZONA_AR).strftime("%Y-%m-%d"),
                 "publishedAt": fecha.isoformat(),
-                "category": categoria,
+                "category": cat,
                 "imageUrl": imagen_de_entrada(entry),
             }
 
             noticias.append(noticia)
             urls.add(enlace)
             titulos.add(titulo.casefold())
+            titulos.add(titulo_final.casefold())
             ids.add(identificador)
 
             nuevas += 1
