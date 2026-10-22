@@ -1,9 +1,8 @@
-
 name: Actualizar Noticias Virales
 
 on:
   schedule:
-    - cron: "17 */4 * * *"
+    - cron: "17 */6 * * *"
   workflow_dispatch:
 
 permissions:
@@ -16,6 +15,7 @@ concurrency:
 jobs:
   actualizar:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Descargar repositorio
@@ -40,27 +40,19 @@ jobs:
       - name: Generar sitemap
         run: python scripts/generate_sitemap.py
 
-      - name: Guardar noticias y pendientes
+      - name: Guardar noticias actualizadas
         run: |
           git config user.name "Bot de Panorama Global News"
           git config user.email "bot@users.noreply.github.com"
 
-          mkdir -p src/data
-
-          if [ ! -f src/data/pending_news.json ]; then
-            echo "[]" > src/data/pending_news.json
-          fi
-
-          git add src/data/news.json
-          git add src/data/pending_news.json
-          git add public/sitemap.xml
+          git add src/data/news.json src/data/pending_news.json public/sitemap.xml
 
           if git diff --cached --quiet; then
-            echo "No hay cambios para guardar."
+            echo "No hay noticias nuevas para guardar."
             exit 0
           fi
 
-          git commit -m "Actualizar noticias y cola de pendientes"
+          git commit -m "Actualizar noticias RSS"
 
           git fetch origin main
           git rebase -X theirs origin/main
