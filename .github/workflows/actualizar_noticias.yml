@@ -1,4 +1,4 @@
-Name: Actualizar Noticias Virales
+name: Actualizar Noticias Virales
 
 on:
   schedule:
