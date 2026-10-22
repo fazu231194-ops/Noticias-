@@ -1,3 +1,4 @@
+
 name: Actualizar Noticias Virales
 
 on:
@@ -39,19 +40,27 @@ jobs:
       - name: Generar sitemap
         run: python scripts/generate_sitemap.py
 
-      - name: Guardar noticias actualizadas
+      - name: Guardar noticias y pendientes
         run: |
           git config user.name "Bot de Panorama Global News"
           git config user.email "bot@users.noreply.github.com"
 
-          git add src/data/news.json public/sitemap.xml
+          mkdir -p src/data
+
+          if [ ! -f src/data/pending_news.json ]; then
+            echo "[]" > src/data/pending_news.json
+          fi
+
+          git add src/data/news.json
+          git add src/data/pending_news.json
+          git add public/sitemap.xml
 
           if git diff --cached --quiet; then
-            echo "No hay noticias nuevas para guardar."
+            echo "No hay cambios para guardar."
             exit 0
           fi
 
-          git commit -m "Actualizar noticias RSS"
+          git commit -m "Actualizar noticias y cola de pendientes"
 
           git fetch origin main
           git rebase -X theirs origin/main
