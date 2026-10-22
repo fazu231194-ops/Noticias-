@@ -227,6 +227,13 @@ def es_error_cuota(error):
     ))
 
 
+def es_bloqueo(error):
+    mensaje = str(error).lower()
+    return any(p in mensaje for p in (
+        "block_reason", "prohibited_content", "prompt_feedback",
+    ))
+
+
 def construir_prompt(lote):
     bloques = []
     for i, pendiente in enumerate(lote, start=1):
@@ -243,16 +250,16 @@ def construir_prompt(lote):
 
 
 def pedir_a_gemini(lote):
-    """Envía un lote de notas a Gemini. Devuelve una lista de notas o None."""
+    """Envía un lote a Gemini. Devuelve (lista_de_notas, bloqueado)."""
     if model is None or estado_ia["cuota_agotada"]:
-        return None
+        return None, False
 
     prompt = construir_prompt(lote)
 
     for intento in (1, 2):
         if estado_ia["llamadas"] >= MAX_LLAMADAS_POR_EJECUCION:
             print("Límite de llamadas a Gemini alcanzado en esta ejecución.")
-            return None
+            return None, False
 
         if estado_ia["llamadas"] > 0:
             time.sleep(PAUSA_ENTRE_LLAMADAS)
@@ -277,10 +284,14 @@ def pedir_a_gemini(lote):
                 raise ValueError("La respuesta no contiene una lista de notas.")
 
             estado_ia["fallos_seguidos"] = 0
-            return notas
+            return notas, False
 
         except Exception as error:
             print(f"Error IA (intento {intento}/2): {error}")
+
+            if es_bloqueo(error):
+                print("Gemini bloqueó este lote por contenido sensible.")
+                return None, True
 
             if es_error_cuota(error):
                 if intento == 1:
@@ -289,12 +300,12 @@ def pedir_a_gemini(lote):
                     continue
                 estado_ia["cuota_agotada"] = True
                 print("Cuota de Gemini agotada. Lo que falta queda en la cola.")
-                return None
+                return None, False
 
             break
 
     estado_ia["fallos_seguidos"] += 1
-    return None
+    return None, False
 
 
 def cargar_json(ruta, valor_predeterminado):
@@ -544,10 +555,18 @@ def ejecutar():
             cola_restante.extend(cola[posicion:])
             break
 
-        lote = cola[posicion:posicion + NOTAS_POR_LLAMADA]
-        posicion += NOTAS_POR_LLAMADA
+        # Las notas marcadas "solo" (tras un bloqueo) se envían de a una
+        if cola[posicion].get("solo"):
+            lote = [cola[posicion]]
+        else:
+            lote = []
+            for candidata in cola[posicion:posicion + NOTAS_POR_LLAMADA]:
+                if candidata.get("solo"):
+                    break
+                lote.append(candidata)
+        posicion += len(lote)
 
-        notas = pedir_a_gemini(lote)
+        notas, bloqueado = pedir_a_gemini(lote)
 
         resultados = {}
         for nota in notas or []:
@@ -558,6 +577,14 @@ def ejecutar():
                     pass
 
         for i, pendiente in enumerate(lote, start=1):
+            if bloqueado:
+                if len(lote) == 1:
+                    print(f"Gemini bloqueó esta nota; se descarta: {pendiente['title'][:80]}")
+                else:
+                    pendiente["solo"] = True
+                    cola_restante.append(pendiente)
+                continue
+
             noticia = preparar_noticia(resultados.get(i), pendiente)
 
             if noticia:
