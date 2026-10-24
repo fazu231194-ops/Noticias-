@@ -1,21 +1,30 @@
 import { useEffect } from "react";
 
-// Pegá acá tu código de AdSense cuando lo tengas (client ID y slot del anuncio)
-// Mientras tanto, estos componentes no muestran nada.
+const ADSENSE_CLIENT = "ca-pub-8492415020519883";
+const ADSENSE_SRC = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`;
 
-/** Espacio reservado para un bloque de anuncios de AdSense. */
-export function AdBanner() {
-  return (
-    <div className="my-8 flex justify-center">
-      {/* TODO: reemplazar por el <ins className="adsbygoogle" ...> de AdSense */}
-    </div>
-  );
+function addScript(src: string) {
+  if (document.querySelector(`script[src="${src}"]`)) return;
+  const s = document.createElement("script");
+  s.src = src;
+  s.async = true;
+  s.crossOrigin = "anonymous";
+  document.head.appendChild(s);
 }
 
-/** Script global de AdSense (se carga una sola vez en toda la web). */
+/**
+ * Con los anuncios automáticos activados en AdSense, Google decide
+ * dónde insertar los anuncios en cada página. No hace falta reservar
+ * un espacio manual, así que este componente no renderiza nada visible.
+ */
+export function AdBanner() {
+  return null;
+}
+
+/** Carga el script de AdSense una sola vez en toda la web. */
 export function AdScripts() {
   useEffect(() => {
-    // TODO: acá va <script async src="https://pagead2.googlesyndication.com/..."> cuando actives AdSense
+    addScript(ADSENSE_SRC);
   }, []);
   return null;
 }
