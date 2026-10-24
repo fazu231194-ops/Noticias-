@@ -1,5 +1,49 @@
 [
   {
+    "id": "5bc2bc3d4d40ce74",
+    "title": "Instacart reportedly discussed selling itself with DoorDash and Uber",
+    "source": "TechCrunch",
+    "sourceUrl": "https://techcrunch.com/2026/10/24/instacart-reportedly-discussed-selling-itself-with-doordash-and-uber/",
+    "publishedAt": "2026-10-24T16:30:00+00:00",
+    "category": "Tecnología",
+    "imageUrl": "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=800&q=80",
+    "rawText": "Instacart might sell itself to a larger competitor, according to multiple news reports\nThe Information reported Friday that the grocery delivery company has hired an investment bank to help it evaluate its options, and that it’s held acquisition talks with DoorDash. And Bloomberg reported that the company has also talked to Uber — although Uber reportedly walked away from those discussions.\nInstacart currently has a market cap of more than $13 billion, and its stock price is up 25% for the year to date. The company could see this as a good time to sell at a desirable price, before the grocery delivery market gets more competitive — but Bloomberg noted that these are early discussions that might not result in a sale.\nAn Instacart spokesperson declined to comment. The reports of a potential sale caused the company’s share price to spike more than 9.2% on Friday, while Uber and DoorDash stock declined.",
+    "intentos": 1
+  },
+  {
+    "id": "35d668020c863316",
+    "title": "Block’s new voice model sounds eerily human",
+    "source": "TechCrunch",
+    "sourceUrl": "https://techcrunch.com/2026/10/24/blocks-new-voice-model-sounds-eerily-human/",
+    "publishedAt": "2026-10-24T16:00:00+00:00",
+    "category": "Tecnología",
+    "imageUrl": "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=800&q=80",
+    "rawText": "Jack Dorsey’s Block released a new voice model out of the company’s research lab that runs locally and sounds strangely human with its expressions like laughs, pauses, and cries. The company said the model, called Dessa, is trained fully on human speech and a single NVIDIA GPU rack.\nDessa is a full-duplex model, which means it can talk and listen at the same time, just like the GPT-Live model OpenAI released earlier this year. Typically, speech models are paired with a large language model for knowledge retrieval. Block said that Dessa’s knowledge stems from the conversational data it has.\nBlock said that the current models can sound unnatural and annoying because they have text in the pipeline that drives speech generation. A lot of models like ElevenLabs v4 or Fish Audio Drama 3 use voice tags to drive emotion in speech generation. Dorsey’s company claims that emotion is built into its model. It’s not clear if that emotion is being steered by some kind of tags.\n“Interacting with current voice AI can just plain suck. It turns your voice into text and throws away an incredible amount of information text alone can’t carry. The most powerful AIs in the world can’t hear how you feel. We think that’s ridiculous, leads to a worse experience, and is potentially dangerous,” the company said in a blog post.\nThe company’s researchers posted multiple examples of conversations with Dessa where the agent had different voices, cadences, and emotions. For instance, in the conversation, the bot said it was tired from work, and at that point it sounded tired.\nIn the example below, the bot was talking about the person making it comfortable while sounding emotional and almost breaking down.\nAnother one shows a Block team member playing a game with the voice assistant.\nThe company said that the model can run locally on a consumer-grade computer such as a MacBook M4 Max or better. However, there is no public access to Dessa at the moment, and Block has put out a call for safety researchers to test the model. This is likely to test out cases where a voice agent could trick people on the other end.\nBlock is in the business of finance and selling its solutions to small businesses. Square already uses voice AI to handle ordering. But with its own voice model that can run on-device, it can power a lot more business and consumer experiences at a lower cost.",
+    "intentos": 1
+  },
+  {
+    "id": "95cc96a04735b50e",
+    "title": "Medio millón de personas mantiene el pulso a Macron en toda Francia pese al despliegue policial",
+    "source": "EL PAÍS: el periódico global",
+    "sourceUrl": "https://elpais.com/internacional/2026-10-24/francia-contiene-el-aliento-ante-una-nueva-jornada-de-protestas.html",
+    "publishedAt": "2026-10-24T15:53:34+00:00",
+    "category": "Mundo",
+    "imageUrl": "https://www.youtube.com/watch?v=oM6vGVzjbOY",
+    "rawText": "El ministro del Interior, pese a la tensión vivida en ciudades como París, Marsella o Lyon, se ha congratulado de una operación que ha dejado ya más de 1.000 detenidos y ha causado menos destrozos que hace una semana",
+    "intentos": 1
+  },
+  {
+    "id": "0f3ca028bc6acc4b",
+    "title": "British woman dies trying to save sons on Bahamas snorkelling trip",
+    "source": "World news | The Guardian",
+    "sourceUrl": "https://www.theguardian.com/world/2026/oct/24/british-woman-dies-trying-to-save-sons-on-bahamas-snorkelling-trip",
+    "publishedAt": "2026-10-24T09:43:09+00:00",
+    "category": "Mundo",
+    "imageUrl": "https://i.guim.co.uk/img/media/8aab2c6d270e81625bcb385b9817033d361e1ea0/252_0_3780_3024/master/3780.jpg?width=140&quality=85&auto=format&fit=max&s=ee5e9e53781191ecd66c4803e2746425",
+    "rawText": "A British woman has died in the Bahamas while trying to rescue her two sons after a current swept them away as they were snorkelling.\nThe Royal Bahamas police force said it had launched an investigation after the death of a 36-year-old woman on Tuesday.\nThe force said they believed she was snorkelling with her husband and two sons near the southern point of the island of North Bimini when a strong current reportedly swept both children away.\nThe police said that in an attempt to rescue her boys, “the woman was also swept away”. The children were later rescued from the water.\nThe Foreign Office said it was in contact with the woman’s family and was providing support.\nBimini is a small island group between the largest landmass in the Bahamas, Andros, and Miami in the US. It is the closest point in the Bahamas to the US mainland.\nThe islands are best known for once being home to Ernest Hemingway and are also home to a world-leading shark research centre.\nIn a statementposted on social media, the Royal Bahamas police force said: “According to the preliminary report, shortly after 10am, officers at the Alice Town police station received information that a female was unresponsive at the North Bimini ferry dock.\n“Officers responded and, upon arrival, learned that the woman had been transported to the local clinic for medical attention, where she was subsequently pronounced dead by a local doctor despite efforts to save her life.\n“Preliminary information indicates that the deceased was snorkelling with her husband and two sons near the southern point of the island when a strong current reportedly swept both children away.\n“In an attempt to rescue her sons, the woman was also swept away.\n“She was later rescued and transported to the ferry dock, where CPR was reportedly administered. Foul play is not suspected at this time.”\nAn autopsy would be carried out to help determine the exact cause of death, the statement said.\nA Foreign, Commonwealth and Development Office spokesperson said: “Our thoughts are with the family of a British woman who has died in the Bahamas.\n“We are in contact with the local authorities and providing support to her family.”",
+    "intentos": 1
+  },
+  {
     "id": "bb7f26fe5a718209",
     "title": "Consultorios vacíos, médicos indispensables",
     "source": "El Financiero",
@@ -8,7 +52,7 @@
     "category": "Economía",
     "imageUrl": "https://elfinanciero-elfinanciero-prod.cdn.arcpublishing.com/resizer/Rj1RcIcgS2F6HJijjDA1Q76WEHE=/cloudfront-us-east-1.images.arcpublishing.com/elfinanciero/JWW74LSPK5BYTKN5KHFLS6JUJE.jpeg",
     "rawText": "Durante más de dos décadas, el doctor Armando Garduño Espinosa ha cuidado la salud de mis hijos. Conoce sus antecedentes, recuerda episodios que nosotros mismos hemos olvidado y conserva una virtud que ninguna aplicación puede sustituir: sabe escuchar antes de extender una receta. Hace unos días, en su consultorio de la colonia Del Valle, me compartió una preocupación que rebasa las paredes de ese edificio: cada vez llegan menos pacientes. Y no porque los mexicanos hayan dejado de enfermarse.\nConocí al doctor Garduño en 2004, durante el Congreso Mundial de Pediatría en Cancún, Quintana Roo. Desde entonces he podido apreciar su calidad profesional y humana. Desde 2005 encabeza el área de cuidados paliativos del Instituto Nacional de Pediatría (INP), una responsabilidad que ha desempeñado durante 21 años, además de contar con 38 años de antigüedad académica en la UNAM. No es precisamente un médico al que le falten experiencia o credenciales.\nSu diagnóstico sobre la consulta privada resulta inquietante. Estima que la demanda de servicios de pediatría, medicina interna y medicina general ha disminuido alrededor de 60% en su entorno profesional. No es una estadística nacional, sino la apreciación de un especialista que ha visto cambiar los hábitos de sus pacientes y las condiciones económicas de las familias.\nParte de la explicación está en los consultorios anexos a farmacias, que ofrecen atención inmediata, incluso en pediatría, y precios accesibles. También influyen las dificultades económicas, la automedicación y la creciente costumbre de buscar respuestas médicas en internet o mediante herramientas de inteligencia artificial. Para muchos pacientes, acudir al especialista dejó de ser la primera opción.\nSería un error descalificar a los médicos que trabajan en las farmacias. Sus servicios responden a una necesidad real de acceso y representan una alternativa para millones de personas. Sin embargo, resolver una consulta ocasional no equivale necesariamente a mantener una relación clínica de largo plazo. La continuidad asistencial permite identificar riesgos, conocer antecedentes, evaluar tratamientos y reconocer síntomas que podrían pasar inadvertidos ante un médico desconocido.\nAquí aparece una contradicción que merece atención. México necesita más servicios médicos, pero también debe evitar que la atención se fragmente en consultas aisladas, sin expedientes compartidos ni mecanismos eficaces de referencia. Ampliar la cobertura constituye un avance; garantizar calidad y seguimiento representa un desafío distinto.\nLa experiencia del doctor Garduño permite observar otra dimensión de la profesión. Buena parte de su trayectoria está dedicada a los cuidados paliativos pediátricos, una especialidad que no se limita a atender pacientes terminales. También busca aliviar el sufrimiento, controlar síntomas y acompañar a niños con enfermedades graves y a sus familias, incluso cuando existen posibilidades de curación.\nPara explicar esa labor utiliza una expresión que resume su filosofía médica: «Es un manto protector para estos pacientes y familias». Quienes hemos conocido su trabajo sabemos que detrás de esas palabras existe una convicción profunda: la medicina también consiste en escuchar, acompañar y preservar la dignidad humana.\nHoy 23 de octubre, Día del Médico, convendría mirar más allá de las felicitaciones institucionales. México necesita profesionales bien preparados, pero también condiciones que permitan aprovechar su experiencia. Porque cuando un consultorio pierde pacientes, no solo enfrenta un problema económico; también puede debilitarse una relación de confianza construida durante generaciones.\nLa experiencia médica también necesita futuro\nAnte la disminución de consultas, el doctor Garduño contempla desarrollar un proyecto especializado en cuidados paliativos pediátricos. Su propósito sería orientar a familias que enfrentan enfermedades complejas y apoyar a colegas ante decisiones clínicas y éticas difíciles. Por ahora es una posibilidad, pero revela una oportunidad para aprovechar conocimientos que el sistema sanitario necesita.\nY es que la atención paliativa requiere equipos interdisciplinarios, coordinación entre instituciones y servicios capaces de acompañar a pacientes fuera del entorno hospitalario cuando sus condiciones lo permitan. No se trata de sustituir tratamientos ni de renunciar a la curación, sino de incorporar el alivio del sufrimiento como parte de una atención integral.\nSin duda, México enfrenta el desafío de fortalecer estos servicios y ampliar su disponibilidad. Profesionales con trayectorias como la del doctor Garduño pueden contribuir a formar nuevas generaciones, orientar modelos de atención y acercar conocimientos especializados a quienes más los necesitan.\nQuizá el mejor reconocimiento a nuestros médicos consista en construir un sistema que valore su experiencia y permita ejercer una medicina donde el paciente sea algo más que el siguiente turno en una sala de espera.\n¡Y gracias por todos estos de acompañamiento médico, querido doctor Garduño!\nSala de Urgencias\n- Cada 23 de octubre abundan los mensajes oficiales que reconocen la vocación de los médicos mexicanos. Las instituciones agradecen su entrega, celebran sus jornadas y destacan su compromiso con la población. Bien harían en acompañar esas felicitaciones con mejores condiciones laborales, insumos suficientes, infraestructura funcional y oportunidades de desarrollo profesional. Una bata blanca no resuelve por sí sola las carencias de un hospital, como tampoco el reconocimiento público sustituye los recursos necesarios para atender a los pacientes. El mejor homenaje a nuestros médicos debería durar bastante más que un día.",
-    "intentos": 1
+    "intentos": 2
   },
   {
     "id": "ba4d1e9e5abda1bf",
@@ -19,7 +63,7 @@
     "category": "Sociedad",
     "imageUrl": "https://www.clarin.com/img/2020/06/25/aJNU5isQk_1200x630__1.jpg",
     "rawText": "Ya se conocen los números ganadores del sorteo de la Nocturna de este viernes 23 de octubre de la Quiniela de la Provincia de Buenos Aires. El primer lugar fue para el número 5672, seguido por el 0281 y el 4359, en segunda y tercera posición.\nLos primeros diez puestos se completaron con el 3041, el 3009, el 5306, el 5017, el 4239, el 9987 y el 0130.\nEl listado completo incluyó, desde el 11° al 20° premio, a los siguientes números: 5162, 8650, 2019, 9799, 0573, 5548, 7876, 3854, 2165, 2783.\nA la cabeza quedó el número 72, que según el significado de los sueños representa a la sorpresa.\nEste juego tradicional es administrado por Lotería de la Provincia Y durante el sorteo se extraen 20 números del 0000 al 9999.\nSon cuatro sorteos diarios, de lunes a sábados. La Primera, a las 11:30; Matutina a las 14; Vespertina a las 17:30 y Nocturna a las 21 hs.\n¿De cuánto es la apuesta mínima?\nLa apuesta mínima es de 2 pesos ($2) por quiniela y 2 pesos ($2) por ticket que, de resultar ganadora, la apuesta puede multiplicarse en siete, setenta, seiscientos o tres mil quinientas veces, según la variante utilizada.\n¿Qué tipos de apuestas hay?\nApuesta directa: se efectúa a un número de 1, 2, 3 o 4 dígitos, pudiendo apostar a la cabeza, a los premios o a ambos.\nApuesta redoblona: se efectúa en forma combinada, a dos números de dos cifras, distintos o iguales. En el último caso, los números deberán figurar como mínimo dos veces en el extracto dentro del lugar de ubicación elegido.\nAclaración: Clarín no se responsabiliza por los errores u omisiones que pudieran existir en esta información. La única lista oficial válida es la proporcionada por la Lotería de la Provincia de Buenos Aires.\n Mirá también\nEl Significado de los Sueños \nNewsletter Clarín\nRecibí en tu mail todas las noticias, historias y análisis de los periodistas de Clarín\nQUIERO RECIBIRLO",
-    "intentos": 1
+    "intentos": 2
   },
   {
     "id": "ab279b749d409a88",
@@ -30,7 +74,7 @@
     "category": "Sociedad",
     "imageUrl": "https://www.clarin.com/img/2020/09/07/JijTxgoxv_1200x630__1.jpg",
     "rawText": "Ya se conocen los números ganadores del sorteo de la Nocturna de este viernes 23 de octubre de la Quiniela de Córdoba. El primer lugar fue para el número 6919, seguido por el 6778 y el 9906, en segunda y tercera posición.\nLos primeros diez puestos se completaron con el 3248, el 7841, el 1409, el 2039, el 9224, el 3632 y el 3340.\nEl listado completo incluyó, desde el 11° al 20° premio, a los siguientes números: 1357, 4274, 8909, 8149, 6979, 9261, 5235, 9705, 7555 y 5674.\nA la cabeza quedó el número 19, que según el significado de los sueños representa al pescado.\nLa Quiniela es el juego de azar más popular de la Argentina. Organizado por la Lotería de Córdoba es seguido por miles de personas.\n¿Cómo se juega a la Quiniela?\nEl juego de la Quiniela consiste en apostar una cierta cantidad de dinero a números de 1 cifra, 2 cifras, 3 cifras o 4 cifras.\n¿Cuántos sorteos hay por día?\nLa Lotería de la Provincia de Córdoba realiza cuatro concursos de Quiniela de lunes a sábados (La Primera de la Mañana, Matutina, Vespertina y Nocturna).\nAclaración: Clarín no se responsabiliza por los errores u omisiones que pudieran existir en esta información. La única lista oficial válida es la proporcionada por la Lotería de la Provincia de Buenos Aires.\n Mirá también\nEl Significado de los Sueños \nNewsletter Clarín\nRecibí en tu mail todas las noticias, historias y análisis de los periodistas de Clarín\nQUIERO RECIBIRLO",
-    "intentos": 1
+    "intentos": 2
   },
   {
     "id": "4dec2ca28c866476",
@@ -41,7 +85,7 @@
     "category": "Mundo",
     "imageUrl": "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=800&q=80",
     "rawText": "Meghan Markle, the Duchess of Sussex, said in a statement Friday that she's \"deeply distressed\" by reports that her father, Thomas Markle, is under investigation in the Philippines for alleged possession of child sexual abuse materials. CBS News reporter Emmet Lyons has more.",
-    "intentos": 1
+    "intentos": 2
   },
   {
     "id": "df0a7db4a0ec74db",
@@ -52,7 +96,7 @@
     "category": "Mundo",
     "imageUrl": "https://prodamdnewsencoding.akamaized.net/NBC_News_Digital/now_hallie_pth_ramaswamy_ad_261023/1/abs/index.m3u8",
     "rawText": "Could rising gas prices in rural Alaska decide the Senate?\n04:09\nAs Trump promises 'goodies' if GOP wins, Iowa Republican says he’s ‘not confident in D.C.’\n07:18\nDemocrat running for Stefanik's seat says 'my identity is not in politics'\n07:28\nTrump defends Ramaswamy's ad featuring Amy Acton's mom\n17:43\n'I'm over it': Iowan laments 'toxic' midterm contests\n12:34\nAmerican Freed From Russian Prison Arrives in Texas\n02:10\nJD Vance Blasts Own Party for ‘Whining’ About Explosive Attack Ad\n03:12\nRamaswamy campaign ad targeted at Amy Acton receives backlash from both parties\n03:02\nHallie Jackson NOW\nRamaswamy says ad featuring Acton’s mother had nothing to do with allegations of sexual abuse\n01:32\nCopied\nOhio Republican gubernatorial candidate Vivek Ramaswamy is defending the ad featuring his opponent Amy Acton’s estranged mother despite backlash from both parties. NBC News’ Priscilla Thompson explains.Oct. 23, 2026",
-    "intentos": 1
+    "intentos": 2
   },
   {
     "id": "e21a350c9ad0ffb9",
@@ -63,7 +107,7 @@
     "category": "Mundo",
     "imageUrl": "https://media-cldnry.s-nbcnews.com/image/upload/t_fit_1500w/rockcms/2026-06/260605-steve-kornacki-cs-2a5f42.jpg",
     "rawText": "Election Day is quickly approaching and, with just over a week to go, Steve Kornacki is ready to answer your questions.\nNBC News’ chief data analyst — who has been crunching all the numbers every Tuesday morning in his subscriber newsletter, “The Data Dive” — will answer your questions in a Data Dive Q&A video that will be posted Monday, available only for NBC News subscribers.",
-    "intentos": 1
+    "intentos": 2
   },
   {
     "id": "b91e3bcb4c9987ed",
