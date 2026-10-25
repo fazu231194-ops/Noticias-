@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://noticiasnoticiasglobales.pages.dev/</loc><lastmod>2026-10-24T18:11:44+00:00</lastmod><changefreq>hourly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://noticiasnoticiasglobales.pages.dev/</loc><lastmod>2026-10-25T00:44:00+00:00</lastmod><changefreq>hourly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/5f592fb49ca54cf6</loc><lastmod>2026-10-25T00:44:00+00:00</lastmod></url>
+  <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/18974a746392975a</loc><lastmod>2026-10-25T00:41:45+00:00</lastmod></url>
+  <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/ab1a380480f7edac</loc><lastmod>2026-10-25T00:10:39+00:00</lastmod></url>
   <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/25c2c85b0f3192ea</loc><lastmod>2026-10-24T18:11:44+00:00</lastmod></url>
+  <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/35d668020c863316</loc><lastmod>2026-10-24T16:00:00+00:00</lastmod></url>
   <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/da3c18f6f5057b40</loc><lastmod>2026-10-24T06:46:59+00:00</lastmod></url>
   <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/e15eda8e16802b53</loc><lastmod>2026-10-24T05:13:12+00:00</lastmod></url>
   <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/d1d4b92e2e029718</loc><lastmod>2026-10-24T04:08:18+00:00</lastmod></url>
@@ -20,6 +24,4 @@
   <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/bb540fbc012cdadb</loc><lastmod>2026-10-23T11:00:00+00:00</lastmod></url>
   <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/0ed6f53d5aeca178</loc><lastmod>2026-10-23T08:47:16+00:00</lastmod></url>
   <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/480426f37f2d0725</loc><lastmod>2026-10-23T04:00:39+00:00</lastmod></url>
-  <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/60af2b37d00855ee</loc><lastmod>2026-10-23T00:50:39+00:00</lastmod></url>
-  <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/db55da87d9a9b7d9</loc><lastmod>2026-10-22T21:53:28+00:00</lastmod></url>
 </urlset>
