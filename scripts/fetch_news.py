@@ -42,7 +42,7 @@ MAX_TEXTO_POR_NOTA = 6000
 # Límites del plan gratuito: 20 solicitudes por día y 5 por minuto
 NOTAS_POR_LLAMADA = 3
 MAX_LLAMADAS_POR_EJECUCION = 4
-PAUSA_ENTRE_LLAMADAS = 15  # segundos
+PAUSA_ENTRE_LLAMADAS = 20  # segundos
 MAX_FALLOS_SEGUIDOS = 2
 MAX_INTENTOS_NOTA = 4
 MAX_COLA = 30
@@ -256,56 +256,49 @@ def pedir_a_gemini(lote):
 
     prompt = construir_prompt(lote)
 
-    for intento in (1, 2):
-        if estado_ia["llamadas"] >= MAX_LLAMADAS_POR_EJECUCION:
-            print("Límite de llamadas a Gemini alcanzado en esta ejecución.")
+    if estado_ia["llamadas"] >= MAX_LLAMADAS_POR_EJECUCION:
+        print("Límite de llamadas a Gemini alcanzado en esta ejecución.")
+        return None, False
+
+    if estado_ia["llamadas"] > 0:
+        time.sleep(PAUSA_ENTRE_LLAMADAS)
+
+    estado_ia["llamadas"] += 1
+
+    try:
+        respuesta = model.generate_content(
+            prompt,
+            generation_config={
+                "response_mime_type": "application/json",
+                "temperature": 0.5,
+                "max_output_tokens": 8192,
+            },
+        )
+        texto = (respuesta.text or "").strip() if respuesta else ""
+        texto = re.sub(r"^```(?:json)?\s*|\s*```$", "", texto)
+        datos = json.loads(texto)
+        notas = datos.get("notas") if isinstance(datos, dict) else datos
+
+        if not isinstance(notas, list):
+            raise ValueError("La respuesta no contiene una lista de notas.")
+
+        estado_ia["fallos_seguidos"] = 0
+        return notas, False
+
+    except Exception as error:
+        print(f"Error IA: {error}")
+
+        if es_bloqueo(error):
+            print("Gemini bloqueó este lote por contenido sensible.")
+            return None, True
+
+        if es_error_cuota(error):
+            estado_ia["cuota_agotada"] = True
+            print("Cuota de Gemini agotada. Lo que falta queda en la cola.")
             return None, False
 
-        if estado_ia["llamadas"] > 0:
-            time.sleep(PAUSA_ENTRE_LLAMADAS)
-
-        estado_ia["llamadas"] += 1
-
-        try:
-            respuesta = model.generate_content(
-                prompt,
-                generation_config={
-                    "response_mime_type": "application/json",
-                    "temperature": 0.5,
-                    "max_output_tokens": 8192,
-                },
-            )
-            texto = (respuesta.text or "").strip() if respuesta else ""
-            texto = re.sub(r"^```(?:json)?\s*|\s*```$", "", texto)
-            datos = json.loads(texto)
-            notas = datos.get("notas") if isinstance(datos, dict) else datos
-
-            if not isinstance(notas, list):
-                raise ValueError("La respuesta no contiene una lista de notas.")
-
-            estado_ia["fallos_seguidos"] = 0
-            return notas, False
-
-        except Exception as error:
-            print(f"Error IA (intento {intento}/2): {error}")
-
-            if es_bloqueo(error):
-                print("Gemini bloqueó este lote por contenido sensible.")
-                return None, True
-
-            if es_error_cuota(error):
-                if intento == 1:
-                    print("Límite alcanzado. Espero 65 segundos y reintento una vez.")
-                    time.sleep(65)
-                    continue
-                estado_ia["cuota_agotada"] = True
-                print("Cuota de Gemini agotada. Lo que falta queda en la cola.")
-                return None, False
-
-            break
-
-    estado_ia["fallos_seguidos"] += 1
-    return None, False
+        estado_ia["fallos_seguidos"] += 1
+        return None, False
 
 
 def cargar_json(ruta, valor_predeterminado):
