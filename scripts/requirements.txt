@@ -1,7 +1,4 @@
 feedparser>=6.0
-openai>=1.40
-feedparser>=6.0
 trafilatura
-feedparser
-trafilatura
+requests
 google-generativeai
