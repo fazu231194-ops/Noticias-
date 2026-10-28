@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://noticiasnoticiasglobales.pages.dev/</loc><lastmod>2026-10-26T01:01:37+00:00</lastmod><changefreq>hourly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/0a8994f1c853c29f</loc><lastmod>2026-10-26T01:01:37+00:00</lastmod></url>
-  <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/6511e95f9d2ddc66</loc><lastmod>2026-10-26T01:01:26+00:00</lastmod></url>
-  <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/148ea56dcaa412c0</loc><lastmod>2026-10-26T00:39:12+00:00</lastmod></url>
-  <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/d4946f64ebcc9f6e</loc><lastmod>2026-10-26T00:35:00+00:00</lastmod></url>
-  <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/858466c542a3ff05</loc><lastmod>2026-10-25T20:35:35+00:00</lastmod></url>
+  <url><loc>https://noticiasnoticiasglobales.pages.dev/</loc><changefreq>hourly</changefreq><priority>1.0</priority></url>
 </urlset>
