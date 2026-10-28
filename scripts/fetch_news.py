@@ -33,13 +33,13 @@ MAX_NOTICIAS = 300
 POR_FUENTE = 2
 HORAS_MAXIMAS = 168  # Conserva noticias y pendientes de hasta 7 dias
 MIN_TEXTO_BASE = 200
-MIN_PALABRAS_ARTICULO = 700
+MIN_PALABRAS_ARTICULO = 450
 MAX_TEXTO_POR_NOTA = 6000
 
-# Maximo 4 llamadas por ejecucion.
-# Con 4 ejecuciones diarias: hasta 16 solicitudes por dia.
+# Maximo 3 llamadas por ejecucion.
+# Con 4 ejecuciones diarias: hasta 12 solicitudes por dia (cupo gratuito: 20/dia).
 NOTAS_POR_LLAMADA = 2
-MAX_LLAMADAS_POR_EJECUCION = 4
+MAX_LLAMADAS_POR_EJECUCION = 3
 PAUSA_ENTRE_LLAMADAS = 20
 MAX_FALLOS_SEGUIDOS = 2
 MAX_INTENTOS_NOTA = 3
@@ -117,16 +117,18 @@ FRASES_DEMO = (
 
 PROMPT = """Sos periodista y editor de Panorama Global News.
 Recibís __CANTIDAD__ notas de origen. Para CADA una, redactá una nota
-periodística original en español, extensa, clara y útil para el lector.
+periodística original en español, clara y útil para el lector.
 
 REGLAS OBLIGATORIAS:
-- Objetivo: entre 800 y 1200 palabras por artículo.
-- No rellenes para alcanzar la extensión. Si la fuente no tiene suficiente
-  información, redactá una nota más corta y fiel, sin inventar hechos.
+- Objetivo: entre 500 y 800 palabras por artículo. Priorizá el desarrollo
+  del tema por sobre la extensión exacta.
+- No rellenes ni repitas ideas para alcanzar la extensión. Si la fuente no
+  tiene suficiente información, desarrollá todo el contexto disponible
+  (antecedentes del tema, implicancias, datos conexos presentes en la
+  fuente) antes que inventar hechos.
 - Usá únicamente hechos, cifras, nombres, fechas y declaraciones presentes
   en el texto base. No agregues antecedentes externos ni supongas consecuencias.
 - No inventes citas, fuentes, declaraciones, cifras ni detalles.
-- No repitas ideas para sumar palabras.
 - Redactá con estructura propia; no copies párrafos de la fuente ni reproduzcas
   más de 6 palabras seguidas del texto base.
 - Separá los hechos confirmados de las posibilidades.
@@ -291,9 +293,7 @@ def construir_prompt(lote):
     bloques = []
 
     for i, pendiente in enumerate(lote, start=1):
-        texto = str(pendiente.get("rawText") or "")[
-            :MAX_TEXTO_POR_NOTA
-        ]
+        texto = str(pendiente.get("rawText") or "")[:MAX_TEXTO_POR_NOTA]
 
         bloques.append(
             f"=== NOTA {i} ===\n"
@@ -421,13 +421,9 @@ def convertir_fecha(texto):
         texto = str(texto).strip()
 
         if "T" in texto:
-            fecha = datetime.fromisoformat(
-                texto.replace("Z", "+00:00")
-            )
+            fecha = datetime.fromisoformat(texto.replace("Z", "+00:00"))
         else:
-            fecha = datetime.strptime(
-                texto[:10], "%Y-%m-%d"
-            ).replace(tzinfo=UTC)
+            fecha = datetime.strptime(texto[:10], "%Y-%m-%d").replace(tzinfo=UTC)
 
         if fecha.tzinfo is None:
             fecha = fecha.replace(tzinfo=UTC)
@@ -445,7 +441,6 @@ def preparar_noticia(datos, pendiente):
     articulo = limpiar_texto_articulo(datos.get("articulo"))
     palabras = len(articulo.split())
 
-    # No publicar artículos demasiado cortos.
     if palabras < MIN_PALABRAS_ARTICULO:
         print(
             f"Artículo muy corto ({palabras} palabras): "
@@ -453,10 +448,7 @@ def preparar_noticia(datos, pendiente):
         )
         return None
 
-    titulo = limpiar_html(
-        str(datos.get("titulo") or "")
-    ) or pendiente["title"]
-
+    titulo = limpiar_html(str(datos.get("titulo") or "")) or pendiente["title"]
     resumen = limpiar_html(str(datos.get("resumen") or ""))
 
     if not resumen:
@@ -470,10 +462,7 @@ def preparar_noticia(datos, pendiente):
     if categoria not in CATEGORIAS_VALIDAS:
         categoria = "Mundo"
 
-    fecha = (
-        convertir_fecha(pendiente.get("publishedAt"))
-        or datetime.now(UTC)
-    )
+    fecha = convertir_fecha(pendiente.get("publishedAt")) or datetime.now(UTC)
 
     return {
         "id": pendiente["id"],
@@ -500,18 +489,13 @@ def ejecutar():
     if model:
         print(f"IA configurada: {MODELO_IA}")
     else:
-        print(
-            "ATENCIÓN: no hay clave de Gemini; "
-            "solo se actualizará la cola."
-        )
+        print("ATENCIÓN: no hay clave de Gemini; solo se actualizará la cola.")
 
     anteriores = cargar_json(NEWS_FILE_PATH, [])
-
     if not isinstance(anteriores, list):
         anteriores = []
 
     pendientes = cargar_json(PENDING_FILE_PATH, [])
-
     if not isinstance(pendientes, list):
         pendientes = []
 
@@ -524,42 +508,26 @@ def ejecutar():
     for noticia in anteriores:
         if not isinstance(noticia, dict):
             continue
-
         if es_noticia_demo(noticia):
             continue
 
-        fecha = convertir_fecha(
-            noticia.get("publishedAt") or noticia.get("date")
-        )
-
-        if not fecha:
-            continue
-
-        if fecha < limite:
-            continue
-
-        if fecha > ahora + timedelta(minutes=5):
+        fecha = convertir_fecha(noticia.get("publishedAt") or noticia.get("date"))
+        if not fecha or fecha < limite or fecha > ahora + timedelta(minutes=5):
             continue
 
         enlace = str(noticia.get("sourceUrl") or "").strip()
-        titulo = limpiar_html(
-            noticia.get("title", "")
-        ).casefold()
+        titulo = limpiar_html(noticia.get("title", "")).casefold()
 
         if enlace and enlace in urls_publicadas:
             continue
-
         if titulo and titulo in titulos_publicados:
             continue
 
         noticias.append(noticia)
-
         if enlace:
             urls_publicadas.add(enlace)
-
         if titulo:
             titulos_publicados.add(titulo)
-
         if noticia.get("id"):
             ids_publicados.add(str(noticia["id"]))
 
@@ -575,23 +543,16 @@ def ejecutar():
         enlace = str(pendiente.get("sourceUrl") or "").strip()
         fecha = convertir_fecha(pendiente.get("publishedAt"))
 
-        if not enlace or not fecha:
+        if not enlace or not fecha or fecha < limite or fecha > ahora + timedelta(minutes=5):
             continue
-
-        if fecha < limite or fecha > ahora + timedelta(minutes=5):
-            continue
-
         if enlace in urls_publicadas or enlace in urls_en_cola:
             continue
-
         if not texto_util(str(pendiente.get("rawText") or "")):
             continue
 
         cola.append(pendiente)
         urls_en_cola.add(enlace)
-        titulos_en_cola.add(
-            limpiar_html(pendiente.get("title", "")).casefold()
-        )
+        titulos_en_cola.add(limpiar_html(pendiente.get("title", "")).casefold())
 
     # 3. Buscar noticias nuevas en fuentes RSS con timeout.
     inicio = (ahora.hour // 6 * 5) % len(RSS_FEEDS)
@@ -599,30 +560,21 @@ def ejecutar():
     candidatas_nuevas = 0
 
     for feed_url, categoria in feeds:
-        if len(cola) >= MAX_COLA:
-            break
-
-        if candidatas_nuevas >= MAX_CANDIDATAS_NUEVAS:
+        if len(cola) >= MAX_COLA or candidatas_nuevas >= MAX_CANDIDATAS_NUEVAS:
             break
 
         try:
             respuesta = requests.get(
                 feed_url,
-                headers={
-                    "User-Agent": (
-                        "Mozilla/5.0 (compatible; PanoramaGlobalNews/1.0)"
-                    )
-                },
+                headers={"User-Agent": "Mozilla/5.0 (compatible; PanoramaGlobalNews/1.0)"},
                 timeout=(TIMEOUT_CONEXION, TIMEOUT_RSS),
             )
-
             respuesta.raise_for_status()
             feed = feedparser.parse(respuesta.content)
 
         except requests.RequestException as error:
             print(f"Error/timeout RSS {feed_url}: {error}")
             continue
-
         except Exception as error:
             print(f"Error leyendo RSS {feed_url}: {error}")
             continue
@@ -636,53 +588,30 @@ def ejecutar():
         for entry in feed.entries:
             if vistas >= POR_FUENTE:
                 break
-
-            if len(cola) >= MAX_COLA:
-                break
-
-            if candidatas_nuevas >= MAX_CANDIDATAS_NUEVAS:
+            if len(cola) >= MAX_COLA or candidatas_nuevas >= MAX_CANDIDATAS_NUEVAS:
                 break
 
             titulo = limpiar_html(entry.get("title", ""))
             enlace = str(entry.get("link") or "").strip()
-
-            resumen_rss = limpiar_html(
-                entry.get("summary", "")
-                or entry.get("description", "")
-            )
-
+            resumen_rss = limpiar_html(entry.get("summary", "") or entry.get("description", ""))
             fecha = fecha_publicacion(entry)
 
             if not titulo or not enlace or not fecha:
                 continue
-
-            if fecha < limite:
+            if fecha < limite or fecha > ahora + timedelta(minutes=5):
                 continue
-
-            if fecha > ahora + timedelta(minutes=5):
-                continue
-
             if enlace in urls_publicadas or enlace in urls_en_cola:
                 continue
-
             if titulo.casefold() in titulos_publicados:
                 continue
-
             if titulo.casefold() in titulos_en_cola:
                 continue
 
-            identificador = hashlib.sha1(
-                enlace.encode("utf-8")
-            ).hexdigest()[:16]
-
+            identificador = hashlib.sha1(enlace.encode("utf-8")).hexdigest()[:16]
             if identificador in ids_publicados:
                 continue
 
-            texto_crudo = (
-                obtener_contenido_completo(enlace)
-                or resumen_rss
-            )
-
+            texto_crudo = obtener_contenido_completo(enlace) or resumen_rss
             if not texto_util(texto_crudo):
                 print(f"Texto insuficiente; se omite: {titulo[:80]}")
                 continue
@@ -690,9 +619,7 @@ def ejecutar():
             cola.append({
                 "id": identificador,
                 "title": titulo,
-                "source": limpiar_html(
-                    feed.feed.get("title", "Fuente RSS")
-                )[:100],
+                "source": limpiar_html(feed.feed.get("title", "Fuente RSS"))[:100],
                 "sourceUrl": enlace,
                 "publishedAt": fecha.isoformat(),
                 "category": categoria,
@@ -700,17 +627,13 @@ def ejecutar():
                 "rawText": texto_crudo[:MAX_TEXTO_POR_NOTA],
                 "intentos": 0,
             })
-
             urls_en_cola.add(enlace)
             titulos_en_cola.add(titulo.casefold())
             vistas += 1
             candidatas_nuevas += 1
 
-    # 4. Redactar noticias en lotes pequeños para evitar JSON truncado.
-    cola.sort(
-        key=lambda pendiente: pendiente.get("publishedAt", ""),
-        reverse=True,
-    )
+    # 4. Redactar la cola en lotes, empezando por lo más reciente.
+    cola.sort(key=lambda p: p.get("publishedAt", ""), reverse=True)
 
     cola_restante = []
     publicadas_ahora = 0
@@ -732,124 +655,65 @@ def ejecutar():
             lote = [cola[posicion]]
         else:
             lote = []
-
-            for candidata in cola[
-                posicion:posicion + NOTAS_POR_LLAMADA
-            ]:
+            for candidata in cola[posicion:posicion + NOTAS_POR_LLAMADA]:
                 if candidata.get("solo"):
                     break
-
                 lote.append(candidata)
-
         posicion += len(lote)
 
         notas, bloqueado = pedir_a_gemini(lote)
 
         resultados = {}
-
         for nota in notas or []:
-            if not isinstance(nota, dict):
-                continue
-
-            try:
-                resultados[int(nota.get("indice"))] = nota
-            except (TypeError, ValueError):
-                pass
+            if isinstance(nota, dict):
+                try:
+                    resultados[int(nota.get("indice"))] = nota
+                except (TypeError, ValueError):
+                    pass
 
         for i, pendiente in enumerate(lote, start=1):
             if bloqueado:
                 if len(lote) == 1:
-                    print(
-                        "Gemini bloqueó la nota; se descarta: "
-                        f"{pendiente['title'][:80]}"
-                    )
+                    print(f"Gemini bloqueó esta nota; se descarta: {pendiente['title'][:80]}")
                 else:
                     pendiente["solo"] = True
                     cola_restante.append(pendiente)
-
                 continue
 
-            noticia = preparar_noticia(
-                resultados.get(i),
-                pendiente,
-            )
+            noticia = preparar_noticia(resultados.get(i), pendiente)
 
             if noticia:
                 noticias.append(noticia)
-
                 urls_publicadas.add(pendiente["sourceUrl"])
-                titulos_publicados.add(
-                    noticia["title"].casefold()
-                )
+                titulos_publicados.add(noticia["title"].casefold())
                 ids_publicados.add(str(noticia["id"]))
-
                 publicadas_ahora += 1
                 continue
 
             if not estado_ia["cuota_agotada"]:
-                pendiente["intentos"] = (
-                    int(pendiente.get("intentos", 0)) + 1
-                )
-
+                pendiente["intentos"] = int(pendiente.get("intentos", 0)) + 1
                 if pendiente["intentos"] >= MAX_INTENTOS_NOTA:
-                    print(
-                        "Se descarta tras varios intentos: "
-                        f"{pendiente['title'][:80]}"
-                    )
+                    print(f"Se descarta tras varios intentos: {pendiente['title'][:80]}")
                     continue
 
             cola_restante.append(pendiente)
 
-    # 5. Limpiar cola y ordenar noticias.
+    # 5. Guardar resultados.
     cola_restante = [
-        pendiente
-        for pendiente in cola_restante
-        if pendiente.get("sourceUrl") not in urls_publicadas
+        p for p in cola_restante if p.get("sourceUrl") not in urls_publicadas
     ][:MAX_COLA]
 
-    noticias.sort(
-        key=lambda noticia: noticia.get("publishedAt", ""),
-        reverse=True,
-    )
+    noticias.sort(key=lambda n: n.get("publishedAt", ""), reverse=True)
 
-    # Si no quedan noticias válidas, intentar conservar las anteriores
-    # en vez de reemplazar news.json por una lista vacía.
-    if not noticias and anteriores:
-        conservadas = [
-            noticia
-            for noticia in anteriores
-            if isinstance(noticia, dict)
-            and not es_noticia_demo(noticia)
-        ]
-
-        if conservadas:
-            print(
-                "No hay noticias nuevas válidas; "
-                "se conserva el contenido anterior."
-            )
-            noticias = conservadas
-
-    # Guardar usando archivos temporales para evitar escrituras parciales.
-    guardar_json(
-        NEWS_FILE_PATH,
-        noticias[:MAX_NOTICIAS],
-    )
-
-    guardar_json(
-        PENDING_FILE_PATH,
-        cola_restante,
-    )
+    guardar_json(NEWS_FILE_PATH, noticias[:MAX_NOTICIAS])
+    guardar_json(PENDING_FILE_PATH, cola_restante)
 
     print(
         f"Proceso terminado: {publicadas_ahora} noticias nuevas; "
         f"{len(cola_restante)} en cola; "
         f"{min(len(noticias), MAX_NOTICIAS)} publicadas; "
         f"{estado_ia['llamadas']} llamadas a Gemini"
-        + (
-            "; cuota agotada."
-            if estado_ia["cuota_agotada"]
-            else "."
-        )
+        + ("; cuota agotada." if estado_ia["cuota_agotada"] else ".")
     )
 
 
