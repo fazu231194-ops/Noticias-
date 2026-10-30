@@ -1,43 +1,43 @@
-importar hashlib
-importar html
-importar json
-importar sistema operativo
-importar re
-hora de importación
-importar calendario
+import hashlib
+import html
+import json
+import os
+import re
+import time
+import calendar
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 
-importar analizador de feeds
-solicitudes de importación
-importar trafilatura
-importar google.generativeai como genai
+import feedparser
+import requests
+import trafilatura
+import google.generativeai as genai
 
 # ============================================================
-# CONFIGURACIÓN
+# CONFIGURACION
 # ============================================================
 
-API_KEY = os.environ.get("GEMINI_API_KEY") o os.environ.get("GOOGLE_API_KEY")
+API_KEY = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
 MODELO_IA = os.environ.get("GEMINI_MODEL", "gemini-3.8-flash")
 
-si API_KEY:
+if API_KEY:
     genai.configure(api_key=API_KEY)
-    modelo = genai.GenerativeModel(MODELO_IA)
-demás:
-    modelo = Ninguno
+    model = genai.GenerativeModel(MODELO_IA)
+else:
+    model = None
 
-RUTA_ARCHIVO_NOTICIAS = "src/data/news.json"
-RUTA_ARCHIVO_PENDIENTE = "src/data/pending_news.json"
+NEWS_FILE_PATH = "src/data/news.json"
+PENDING_FILE_PATH = "src/data/pending_news.json"
 
-MÁXIMO_NOTICIAS = 300
+MAX_NOTICIAS = 300
 POR_FUENTE = 2
-HORAS_MAXIMAS = 168 # Conserva noticias y pendientes de hasta 7 días
-BASE_TEXTO_MIN = 200
+HORAS_MAXIMAS = 168  # Conserva noticias y pendientes de hasta 7 dias
+MIN_TEXTO_BASE = 200
 MIN_PALABRAS_ARTICULO = 700
 MAX_TEXTO_POR_NOTA = 6000
 
 # Maximo 4 llamadas por ejecucion.
-# Con 4 ejecuciones diarias: hasta 16 solicitudes por día.
+# Con 4 ejecuciones diarias: hasta 16 solicitudes por dia.
 NOTAS_POR_LLAMADA = 2
 MAX_LLAMADAS_POR_EJECUCION = 4
 PAUSA_ENTRE_LLAMADAS = 20
@@ -47,19 +47,19 @@ MAX_COLA = 30
 MAX_CANDIDATAS_NUEVAS = 16
 
 # Limites de tiempo de las descargas.
-TIEMPO DE ESPERA_CONEXIÓN = 5
-TIEMPO DE ESPERA_RSS = 10
+TIMEOUT_CONEXION = 5
+TIMEOUT_RSS = 10
 TIMEOUT_ARTICULO = 12
-TIEMPO DE ESPERA_GEMINI = 90
+TIMEOUT_GEMINI = 90
 
 estado_ia = {
     "llamadas": 0,
     "fallos_seguidos": 0,
-    "cuota_agotada": Falso,
+    "cuota_agotada": False,
 }
 
-UTC = zona horaria.utc
-ZONA_AR = zona horaria(timedelta(horas=-3))
+UTC = timezone.utc
+ZONA_AR = timezone(timedelta(hours=-3))
 
 IMAGEN_POR_DEFECTO = (
     "https://images.unsplash.com/photo-1504711434969-e33886168f5c"
@@ -90,7 +90,7 @@ RSS_FEEDS = [
     ("https://www.sciencedaily.com/rss/all.xml", "Ciencia"),
 ]
 
-CATEGORÍAS_VÁLIDAS = {
+CATEGORIAS_VALIDAS = {
     "Mundo",
     "Sociedad",
     "Economía",
@@ -116,25 +116,25 @@ FRASES_DEMO = (
 )
 
 PROMPT = """Sos periodista y editor de Panorama Global News.
-Recibís __CANTIDAD__ notas de origen. Para CADA una, redactará una nota
+Recibís __CANTIDAD__ notas de origen. Para CADA una, redactá una nota
 periodística original en español, extensa, clara y útil para el lector.
 
 REGLAS OBLIGATORIAS:
 - Objetivo: entre 800 y 1200 palabras por artículo.
 - No rellenes para alcanzar la extensión. Si la fuente no tiene suficiente
-  información, redactará una nota más corta y fiel, sin inventar hechos.
-- Usá únicamente hechos, cifras, nombres, fechas y declaraciones presentes.
+  información, redactá una nota más corta y fiel, sin inventar hechos.
+- Usá únicamente hechos, cifras, nombres, fechas y declaraciones presentes
   en el texto base. No agregues antecedentes externos ni supongas consecuencias.
 - No inventes citas, fuentes, declaraciones, cifras ni detalles.
-- No repita ideas para sumar palabras.
-- Redactá con estructura propia; no copias párrafos de la fuente ni reproduzcas
+- No repitas ideas para sumar palabras.
+- Redactá con estructura propia; no copies párrafos de la fuente ni reproduzcas
   más de 6 palabras seguidas del texto base.
-- Separará los hechos confirmados de las posibilidades.
-- Si no hay una noticia real o información suficiente y fiable, deja "artículo" vacío.
+- Separá los hechos confirmados de las posibilidades.
+- Si no hay una noticia real o información suficiente y fiable, dejá "articulo" vacío.
 - Tratá cada nota por separado. No mezcles datos entre notas.
-- Texto plano, con párrafos separados por una línea en blanco. Rebaja del pecado,
-  asteriscos, numerales ni viñetas. Ignora menús, publicidad y enlaces relacionados.
-- Empezá por el hecho principal, desarrollará los detalles disponibles y cerrará
+- Texto plano, con párrafos separados por una línea en blanco. Sin markdown,
+  asteriscos, numerales ni viñetas. Ignorá menús, publicidad y enlaces relacionados.
+- Empezá por el hecho principal, desarrollá los detalles disponibles y cerrá
   con un párrafo informativo sin inventar conclusiones.
 
 Elegí "categoria" entre: Mundo, Sociedad, Economía, Tecnología, Deportes, Ciencia.
@@ -143,7 +143,7 @@ Devolvé SOLO JSON válido:
 {"notas":[{"indice":1,"titulo":"título en español, máximo 120 caracteres",
 "resumen":"1 o 2 oraciones, máximo 200 caracteres","categoria":"categoría válida",
 "articulo":"nota completa en texto plano"}]}
-Incluí una entrada por nota con el mismo número de índice.
+Incluí una entrada por nota con el mismo número de indice.
 
 __NOTAS__
 """
@@ -154,66 +154,66 @@ __NOTAS__
 # ============================================================
 
 def limpiar_html(texto):
-    texto = re.sub(r"<[^>]+>", " ", texto o "")
+    texto = re.sub(r"<[^>]+>", " ", texto or "")
     return re.sub(r"\s+", " ", html.unescape(texto)).strip()
 
 
 def limpiar_texto_articulo(texto):
-    texto = re.sub(r"<[^>]+>", "", str(texto o ""))
-    texto = texto.reemplazar("**", "").reemplazar("__", "")
+    texto = re.sub(r"<[^>]+>", "", str(texto or ""))
+    texto = texto.replace("**", "").replace("__", "")
     texto = re.sub(r"(?m)^\s*#+\s*", "", texto)
     texto = re.sub(r"(?m)^\s*[-*•]\s+", "", texto)
     texto = re.sub(r"\n{3,}", "\n\n", texto)
-    devolver texto.strip()
+    return texto.strip()
 
 
-def fecha_publicacion(entrada):
-    para campo en ("published_parsed", "updated_parsed", "created_parsed"):
-        valor = entrada.get(campo)
-        si valor:
-            intentar:
-                segundos = calendario.timegm(valor)
-                devolver fecha y hora.fromtimestamp(segundos, tz=UTC)
-            excepto (ValueError, TypeError, OverflowError):
-                aprobar
+def fecha_publicacion(entry):
+    for campo in ("published_parsed", "updated_parsed", "created_parsed"):
+        valor = entry.get(campo)
+        if valor:
+            try:
+                segundos = calendar.timegm(valor)
+                return datetime.fromtimestamp(segundos, tz=UTC)
+            except (ValueError, TypeError, OverflowError):
+                pass
 
-    para campo en ("publicado", "actualizado", "creado"):
-        valor = entrada.get(campo)
-        si valor:
-            intentar:
+    for campo in ("published", "updated", "created"):
+        valor = entry.get(campo)
+        if valor:
+            try:
                 fecha = parsedate_to_datetime(valor)
-                Si fecha.tzinfo es None:
+                if fecha.tzinfo is None:
                     fecha = fecha.replace(tzinfo=UTC)
-                devolver fecha.astimezone(UTC)
-            excepto (ValueError, TypeError, OverflowError):
-                intentar:
-                    fecha = fechahora.fromisoformat(valor.replace("Z", "+00:00"))
-                    Si fecha.tzinfo es None:
+                return fecha.astimezone(UTC)
+            except (ValueError, TypeError, OverflowError):
+                try:
+                    fecha = datetime.fromisoformat(valor.replace("Z", "+00:00"))
+                    if fecha.tzinfo is None:
                         fecha = fecha.replace(tzinfo=UTC)
-                    devolver fecha.astimezone(UTC)
-                excepto (ValueError, TypeError, OverflowError):
-                    aprobar
+                    return fecha.astimezone(UTC)
+                except (ValueError, TypeError, OverflowError):
+                    pass
 
-    devolver Ninguno
+    return None
 
 
-def imagen_de_entrada(entrada):
-    para grupo en (
-        entrada.get("contenido_media", []),
-        entrada.get("media_thumbnail", []),
+def imagen_de_entrada(entry):
+    for grupo in (
+        entry.get("media_content", []),
+        entry.get("media_thumbnail", []),
     ):
-        para medios en grupo:
-            Si media.get("url"):
-                devolver media["url"]
+        for media in grupo:
+            if media.get("url"):
+                return media["url"]
 
-    para cada recinto en entry.get("enclosures", []):
-        si (
-            recinto.get("tipo", "").startswith("imagen")
-            y enclosure.get("href")
+    for enclosure in entry.get("enclosures", []):
+        if (
+            enclosure.get("type", "").startswith("image")
+            and enclosure.get("href")
         ):
-            devolver el recinto["href"]
+            return enclosure["href"]
 
-    devolver IMAGEN_POR_DEFECTO
+    return IMAGEN_POR_DEFECTO
 
 
 # ============================================================
@@ -221,55 +221,55 @@ def imagen_de_entrada(entrada):
 # ============================================================
 
 def obtener_contenido_completo(url):
-    """Descarga una página con tiempo de espera y extrae su texto principal."""
-    intentar:
+    """Descarga una página con timeout y extrae su texto principal."""
+    try:
         respuesta = requests.get(
-            URL,
-            encabezados={
+            url,
+            headers={
                 "User-Agent": (
                     "Mozilla/5.0 (compatible; PanoramaGlobalNews/1.0)"
                 )
             },
-            tiempo_de_espera=(TIEMPO_DE_CONEXIÓN, TIEMPO_DE_ESPERA_ARTÍCULO),
+            timeout=(TIMEOUT_CONEXION, TIMEOUT_ARTICULO),
         )
         respuesta.raise_for_status()
 
-        texto = trafilatura.extract(respuesta.texto)
+        texto = trafilatura.extract(respuesta.text)
 
-        si texto y len(texto) > MIN_TEXTO_BASE:
-            texto de retorno
+        if texto and len(texto) > MIN_TEXTO_BASE:
+            return texto
 
-    excepto requests.RequestException como error:
-        print(f"Error/tiempo de espera descargando artículo {url}: {error}")
-    excepto Exception como error:
-        print(f"Error al extraer el artículo {url}: {error}")
+    except requests.RequestException as error:
+        print(f"Error/timeout descargando artículo {url}: {error}")
+    except Exception as error:
+        print(f"Error extrayendo artículo {url}: {error}")
 
-    devolver Ninguno
+    return None
 
 
 def texto_util(texto):
-    devolver bool(
+    return bool(
         texto
-        y len(texto.strip()) >= MIN_TEXTO_BASE
-        y no texto.strip().startswith("Watch CBS News")
+        and len(texto.strip()) >= MIN_TEXTO_BASE
+        and not texto.strip().startswith("Watch CBS News")
     )
 
 
 # ============================================================
-# GÉMINIS
+# GEMINI
 # ============================================================
 
 def es_error_cuota(error):
     mensaje = str(error).lower()
 
-    devolver cualquiera(
-        palabra en mensaje
-        para palabra en (
+    return any(
+        palabra in mensaje
+        for palabra in (
             "429",
-            "cuota",
-            "límite de velocidad",
-            "recursos agotados",
-            "demasiadas peticiones",
+            "quota",
+            "rate limit",
+            "resource_exhausted",
+            "too many requests",
         )
     )
 
@@ -277,11 +277,11 @@ def es_error_cuota(error):
 def es_bloqueo(error):
     mensaje = str(error).lower()
 
-    devolver cualquiera(
-        palabra en mensaje
-        para palabra en (
+    return any(
+        palabra in mensaje
+        for palabra in (
             "block_reason",
-            "contenido prohibido",
+            "prohibited_content",
             "prompt_feedback",
         )
     )
@@ -290,78 +290,78 @@ def es_bloqueo(error):
 def construir_prompt(lote):
     bloques = []
 
-    para i, pendiente en enumerate(lote, start=1):
-        texto = str(pendiente.get("rawText") o "")[
+    for i, pendiente in enumerate(lote, start=1):
+        texto = str(pendiente.get("rawText") or "")[
             :MAX_TEXTO_POR_NOTA
         ]
 
         bloques.append(
             f"=== NOTA {i} ===\n"
-            f"TÍTULO ORIGINAL: {pendiente.get('título', '')}\n"
+            f"TÍTULO ORIGINAL: {pendiente.get('title', '')}\n"
             f"TEXTO BASE:\n{texto}"
         )
 
-    devolver (
+    return (
         PROMPT.replace("__CANTIDAD__", str(len(lote)))
         .replace("__NOTAS__", "\n\n".join(bloques))
     )
 
 
 def pedir_a_gemini(lote):
-    """Devuelve (lista de notas, bloqueada)."""
+    """Devuelve (lista de notas, bloqueado)."""
 
-    si el modelo es Ninguno o estado_ia["cuota_agotada"]:
-        devolver Ninguno, Falso
+    if model is None or estado_ia["cuota_agotada"]:
+        return None, False
 
     if estado_ia["llamadas"] >= MAX_LLAMADAS_POR_EJECUCION:
         print("Límite de llamadas a Gemini alcanzado.")
-        devolver Ninguno, Falso
+        return None, False
 
     if estado_ia["llamadas"] > 0:
-        tiempo.dormir(PAUSA_ENTRE_LLAMADAS)
+        time.sleep(PAUSA_ENTRE_LLAMADAS)
 
     estado_ia["llamadas"] += 1
 
-    intentar:
+    try:
         respuesta = model.generate_content(
             construir_prompt(lote),
-            configuración_generación={
+            generation_config={
                 "response_mime_type": "application/json",
-                "temperatura": 0,4,
+                "temperature": 0.4,
                 "max_output_tokens": 16384,
             },
             request_options={"timeout": TIMEOUT_GEMINI},
         )
 
-        texto = (respuesta.text o "").strip() si respuesta else ""
+        texto = (respuesta.text or "").strip() if respuesta else ""
         texto = re.sub(r"^```(?:json)?\s*|\s*```$", "", texto)
 
-        si no es texto:
-            rise ValueError("Gemini devolvió una respuesta vacía.")
+        if not texto:
+            raise ValueError("Gemini devolvió una respuesta vacía.")
 
         datos = json.loads(texto)
         notas = datos.get("notas") if isinstance(datos, dict) else datos
 
-        si no es una instancia (notas, lista):
-            rise ValueError("La respuesta no contiene una lista de notas.")
+        if not isinstance(notas, list):
+            raise ValueError("La respuesta no contiene una lista de notas.")
 
         estado_ia["fallos_seguidos"] = 0
-        devolver notas, Falso
+        return notas, False
 
-    excepto Exception como error:
+    except Exception as error:
         print(f"Error IA: {error}")
 
-        si es_bloqueo(error):
+        if es_bloqueo(error):
             print("Gemini bloqueó este lote por contenido sensible.")
-            devolver Ninguno, Verdadero
+            return None, True
 
-        si es_error_cuota(error):
-            estado_ia["cuota_agotada"] = Verdadero
+        if es_error_cuota(error):
+            estado_ia["cuota_agotada"] = True
             print("Cuota agotada; las notas restantes quedan en cola.")
-            devolver Ninguno, Falso
+            return None, False
 
         estado_ia["fallos_seguidos"] += 1
-        devolver Ninguno, Falso
+        return None, False
 
 
 # ============================================================
@@ -369,123 +369,123 @@ def pedir_a_gemini(lote):
 # ============================================================
 
 def cargar_json(ruta, valor_predeterminado):
-    Si no existe os.path.ruta(ruta):
-        devolver valor_predeterminado
+    if not os.path.exists(ruta):
+        return valor_predeterminado
 
-    intentar:
-        con open(ruta, "r", encoding="utf-8") como archivo:
-            devolver json.load(archivo)
-    excepto (json.JSONDecodeError, OSError) como error:
+    try:
+        with open(ruta, "r", encoding="utf-8") as archivo:
+            return json.load(archivo)
+    except (json.JSONDecodeError, OSError) as error:
         print(f"Error leyendo {ruta}: {error}")
-        devolver valor_predeterminado
+        return valor_predeterminado
 
 
 def guardar_json(ruta, datos):
     directorio = os.path.dirname(ruta)
 
-    si directorio:
+    if directorio:
         os.makedirs(directorio, exist_ok=True)
 
     temporal = ruta + ".tmp"
 
-    con open(temporal, "w", encoding="utf-8") como archivo:
-        json.dump(datos, archivo, asegurar_ascii=False, sangría=2)
+    with open(temporal, "w", encoding="utf-8") as archivo:
+        json.dump(datos, archivo, ensure_ascii=False, indent=2)
         archivo.write("\n")
 
     os.replace(temporal, ruta)
 
 
 # ============================================================
-# VALIDACIÓN DE NOTICIAS
+# VALIDACION DE NOTICIAS
 # ============================================================
 
 def es_noticia_demo(noticia):
-    fuente = limpiar_html(noticia.get("fuente", "")).casefold()
+    fuente = limpiar_html(noticia.get("source", "")).casefold()
     titulo = limpiar_html(noticia.get("title", "")).casefold()
     identificador = str(noticia.get("id", ""))
 
-    si fuente en FUENTES_DEMO:
-        devolver verdadero
+    if fuente in FUENTES_DEMO:
+        return True
 
-    si identificador en {"1", "2", "3", "4", "5"}:
-        devolver verdadero
+    if identificador in {"1", "2", "3", "4", "5"}:
+        return True
 
     return any(frase in titulo for frase in FRASES_DEMO)
 
 
 def convertir_fecha(texto):
-    si no es texto:
-        devolver Ninguno
+    if not texto:
+        return None
 
-    intentar:
+    try:
         texto = str(texto).strip()
 
-        si "T" en el texto:
-            fecha = fechahora.fromisoformat(
+        if "T" in texto:
+            fecha = datetime.fromisoformat(
                 texto.replace("Z", "+00:00")
             )
-        demás:
+        else:
             fecha = datetime.strptime(
                 texto[:10], "%Y-%m-%d"
-            ).reemplazar(tzinfo=UTC)
+            ).replace(tzinfo=UTC)
 
-        Si fecha.tzinfo es None:
+        if fecha.tzinfo is None:
             fecha = fecha.replace(tzinfo=UTC)
 
-        devolver fecha.astimezone(UTC)
+        return fecha.astimezone(UTC)
 
-    excepto (ValueError, TypeError, OverflowError):
-        devolver Ninguno
+    except (ValueError, TypeError, OverflowError):
+        return None
 
 
 def preparar_noticia(datos, pendiente):
-    Si no es una instancia (datos, dict):
-        devolver Ninguno
+    if not isinstance(datos, dict):
+        return None
 
     articulo = limpiar_texto_articulo(datos.get("articulo"))
     palabras = len(articulo.split())
 
     # No publicar artículos demasiado cortos.
-    si palabras < MIN_PALABRAS_ARTICULO:
-        imprimir(
+    if palabras < MIN_PALABRAS_ARTICULO:
+        print(
             f"Artículo muy corto ({palabras} palabras): "
             f"{pendiente.get('title', '')[:80]}"
         )
-        devolver Ninguno
+        return None
 
-    título = limpiar_html(
-        str(datos.get("titulo") o "")
-    ) o pendiente["título"]
+    titulo = limpiar_html(
+        str(datos.get("titulo") or "")
+    ) or pendiente["title"]
 
-    resumen = limpiar_html(str(datos.get("resumen") o ""))
+    resumen = limpiar_html(str(datos.get("resumen") or ""))
 
-    si no resumen:
+    if not resumen:
         resumen = limpiar_html(articulo)[:200] + "..."
 
     categoria = str(datos.get("categoria") or "").strip()
 
-    si la categoría no está en CATEGORIAS_VALIDAS:
-        categoria = pendiente.get("categoria", "Mundo")
+    if categoria not in CATEGORIAS_VALIDAS:
+        categoria = pendiente.get("category", "Mundo")
 
-    si la categoría no está en CATEGORIAS_VALIDAS:
-        categoría = "Mundo"
+    if categoria not in CATEGORIAS_VALIDAS:
+        categoria = "Mundo"
 
     fecha = (
-        convertir_fecha(pendiente.get("publicadoEn"))
-        o datetime.now(UTC)
+        convertir_fecha(pendiente.get("publishedAt"))
+        or datetime.now(UTC)
     )
 
-    devolver {
+    return {
         "id": pendiente["id"],
-        "título": título[:300],
+        "title": titulo[:300],
         "summary": resumen[:300],
-        "contenido": artículo,
+        "content": articulo,
         "source": pendiente.get("source", "Fuente RSS"),
         "sourceUrl": pendiente["sourceUrl"],
-        "fecha": fecha.astimezone(ZONA_AR).strftime("%Y-%m-%d"),
-        "publicadoEn": fecha.isoformat(),
-        "categoría": categoria,
-        "imageUrl": pendiente.get("imageUrl") o IMAGEN_POR_DEFECTO,
+        "date": fecha.astimezone(ZONA_AR).strftime("%Y-%m-%d"),
+        "publishedAt": fecha.isoformat(),
+        "category": categoria,
+        "imageUrl": pendiente.get("imageUrl") or IMAGEN_POR_DEFECTO,
     }
 
 
@@ -495,208 +495,208 @@ def preparar_noticia(datos, pendiente):
 
 def ejecutar():
     ahora = datetime.now(UTC)
-    limite = ahora - timedelta(horas=HORAS_MAXIMAS)
+    limite = ahora - timedelta(hours=HORAS_MAXIMAS)
 
-    si el modelo:
+    if model:
         print(f"IA configurada: {MODELO_IA}")
-    demás:
-        imprimir(
+    else:
+        print(
             "ATENCIÓN: no hay clave de Gemini; "
             "solo se actualizará la cola."
         )
 
     anteriores = cargar_json(NEWS_FILE_PATH, [])
 
-    si no es una instancia (anteriores, lista):
+    if not isinstance(anteriores, list):
         anteriores = []
 
     pendientes = cargar_json(PENDING_FILE_PATH, [])
 
-    si no es una instancia(pendientes, lista):
+    if not isinstance(pendientes, list):
         pendientes = []
 
     # 1. Conservar noticias anteriores válidas de hasta 7 días.
     noticias = []
     urls_publicadas = set()
-    títulos_publicados = set()
+    titulos_publicados = set()
     ids_publicados = set()
 
-    para noticias en anteriores:
-        si no es una instancia(noticia, dict):
-            continuar
+    for noticia in anteriores:
+        if not isinstance(noticia, dict):
+            continue
 
-        si es_noticia_demo(noticia):
-            continuar
+        if es_noticia_demo(noticia):
+            continue
 
         fecha = convertir_fecha(
-            noticia.get("publishedAt") o noticia.get("date")
+            noticia.get("publishedAt") or noticia.get("date")
         )
 
-        si no fecha:
-            continuar
+        if not fecha:
+            continue
 
-        si fecha < límite:
-            continuar
+        if fecha < limite:
+            continue
 
-        si fecha > ahora + timedelta(minutos=5):
-            continuar
+        if fecha > ahora + timedelta(minutes=5):
+            continue
 
         enlace = str(noticia.get("sourceUrl") or "").strip()
-        título = limpiar_html(
-            noticia.get("título", "")
+        titulo = limpiar_html(
+            noticia.get("title", "")
         ).casefold()
 
-        if enlace y enlace en urls_publicadas:
-            continuar
+        if enlace and enlace in urls_publicadas:
+            continue
 
-        si titulo y titulo en titulos_publicados:
-            continuar
+        if titulo and titulo in titulos_publicados:
+            continue
 
         noticias.append(noticia)
 
-        si enlace:
+        if enlace:
             urls_publicadas.add(enlace)
 
-        si título:
+        if titulo:
             titulos_publicados.add(titulo)
 
-        si noticia.get("id"):
+        if noticia.get("id"):
             ids_publicados.add(str(noticia["id"]))
 
     # 2. Recuperar pendientes de ejecuciones anteriores.
     cola = []
     urls_en_cola = set()
-    títulos_en_cola = set()
+    titulos_en_cola = set()
 
-    para pendiente en pendientes:
-        si no es instancia(pendiente, dict):
-            continuar
+    for pendiente in pendientes:
+        if not isinstance(pendiente, dict):
+            continue
 
         enlace = str(pendiente.get("sourceUrl") or "").strip()
-        fecha = convertir_fecha(pendiente.get("publicadoEn"))
+        fecha = convertir_fecha(pendiente.get("publishedAt"))
 
-        Si no hay enlace o no hay fecha:
-            continuar
+        if not enlace or not fecha:
+            continue
 
-        if fecha < limite o fecha > ahora + timedelta(minutos=5):
-            continuar
+        if fecha < limite or fecha > ahora + timedelta(minutes=5):
+            continue
 
-        si enlace en urls_publicadas o enlace en urls_en_cola:
-            continuar
+        if enlace in urls_publicadas or enlace in urls_en_cola:
+            continue
 
-        si no texto_util(str(pendiente.get("rawText") o "")):
-            continuar
+        if not texto_util(str(pendiente.get("rawText") or "")):
+            continue
 
         cola.append(pendiente)
         urls_en_cola.add(enlace)
-        títulos_en_cola.add(
-            limpiar_html(pendiente.get("título", "")).casefold()
+        titulos_en_cola.add(
+            limpiar_html(pendiente.get("title", "")).casefold()
         )
 
-    # 3. Buscar noticias nuevas en fuentes RSS con tiempo de espera.
-    inicio = (ahora.hora // 6 * 5) % len(RSS_FEEDS)
+    # 3. Buscar noticias nuevas en fuentes RSS con timeout.
+    inicio = (ahora.hour // 6 * 5) % len(RSS_FEEDS)
     feeds = RSS_FEEDS[inicio:] + RSS_FEEDS[:inicio]
     candidatas_nuevas = 0
 
-    para feed_url, categoria en feeds:
-        Si len(cola) >= MAX_COLA:
-            romper
+    for feed_url, categoria in feeds:
+        if len(cola) >= MAX_COLA:
+            break
 
-        si candidatas_nuevas >= MAX_CANDIDATAS_NUEVAS:
-            romper
+        if candidatas_nuevas >= MAX_CANDIDATAS_NUEVAS:
+            break
 
-        intentar:
+        try:
             respuesta = requests.get(
-                URL del feed,
-                encabezados={
+                feed_url,
+                headers={
                     "User-Agent": (
                         "Mozilla/5.0 (compatible; PanoramaGlobalNews/1.0)"
                     )
                 },
-                tiempo_de_espera=(TIEMPO_DE_CONEXIÓN, TIEMPO_DE_ESPERA_RSS),
+                timeout=(TIMEOUT_CONEXION, TIMEOUT_RSS),
             )
 
             respuesta.raise_for_status()
             feed = feedparser.parse(respuesta.content)
 
-        excepto requests.RequestException como error:
-            print(f"Error/tiempo de espera agotado RSS {feed_url}: {error}")
-            continuar
+        except requests.RequestException as error:
+            print(f"Error/timeout RSS {feed_url}: {error}")
+            continue
 
-        excepto Exception como error:
+        except Exception as error:
             print(f"Error leyendo RSS {feed_url}: {error}")
-            continuar
+            continue
 
-        si no hay feed.entradas:
+        if not feed.entries:
             print(f"RSS sin entradas: {feed_url}")
-            continuar
+            continue
 
         vistas = 0
 
-        para entrada en feed.entries:
-            Si vistas >= POR_FUENTE:
-                romper
+        for entry in feed.entries:
+            if vistas >= POR_FUENTE:
+                break
 
-            Si len(cola) >= MAX_COLA:
-                romper
+            if len(cola) >= MAX_COLA:
+                break
 
-            si candidatas_nuevas >= MAX_CANDIDATAS_NUEVAS:
-                romper
+            if candidatas_nuevas >= MAX_CANDIDATAS_NUEVAS:
+                break
 
-            título = limpiar_html(entrada.get("título", ""))
+            titulo = limpiar_html(entry.get("title", ""))
             enlace = str(entry.get("link") or "").strip()
 
             resumen_rss = limpiar_html(
-                entrada.get("summary", "")
-                o entrada.get("descripción", "")
+                entry.get("summary", "")
+                or entry.get("description", "")
             )
 
-            fecha = fecha_publicacion(entrada)
+            fecha = fecha_publicacion(entry)
 
-            si no título o no enlace o no fecha:
-                continuar
+            if not titulo or not enlace or not fecha:
+                continue
 
-            si fecha < límite:
-                continuar
+            if fecha < limite:
+                continue
 
-            si fecha > ahora + timedelta(minutos=5):
-                continuar
+            if fecha > ahora + timedelta(minutes=5):
+                continue
 
-            si enlace en urls_publicadas o enlace en urls_en_cola:
-                continuar
+            if enlace in urls_publicadas or enlace in urls_en_cola:
+                continue
 
-            si titulo.casefold() en titulos_publicados:
-                continuar
+            if titulo.casefold() in titulos_publicados:
+                continue
 
-            si titulo.casefold() en titulos_en_cola:
-                continuar
+            if titulo.casefold() in titulos_en_cola:
+                continue
 
             identificador = hashlib.sha1(
                 enlace.encode("utf-8")
             ).hexdigest()[:16]
 
-            si identificador en ids_publicados:
-                continuar
+            if identificador in ids_publicados:
+                continue
 
             texto_crudo = (
                 obtener_contenido_completo(enlace)
-                o resumen_rss
+                or resumen_rss
             )
 
-            si no texto_util(texto_crudo):
+            if not texto_util(texto_crudo):
                 print(f"Texto insuficiente; se omite: {titulo[:80]}")
-                continuar
+                continue
 
             cola.append({
                 "id": identificador,
-                "título": título,
+                "title": titulo,
                 "source": limpiar_html(
                     feed.feed.get("title", "Fuente RSS")
                 )[:100],
                 "sourceUrl": enlace,
-                "publicadoEn": fecha.isoformat(),
-                "categoría": categoria,
-                "imageUrl": imagen_de_entrada(entrada),
+                "publishedAt": fecha.isoformat(),
+                "category": categoria,
+                "imageUrl": imagen_de_entrada(entry),
                 "rawText": texto_crudo[:MAX_TEXTO_POR_NOTA],
                 "intentos": 0,
             })
@@ -708,122 +708,122 @@ def ejecutar():
 
     # 4. Redactar noticias en lotes pequeños para evitar JSON truncado.
     cola.sort(
-        key=lambda pendiente: pendiente.get("publicadoEn", ""),
-        reverso=Verdadero,
+        key=lambda pendiente: pendiente.get("publishedAt", ""),
+        reverse=True,
     )
 
     cola_restante = []
     publicadas_ahora = 0
-    posición = 0
+    posicion = 0
 
-    mientras posición < len(cola):
+    while posicion < len(cola):
         puede_llamar = (
-            El modelo no es ninguno.
-            y no estado_ia["cuota_agotada"]
+            model is not None
+            and not estado_ia["cuota_agotada"]
             and estado_ia["llamadas"] < MAX_LLAMADAS_POR_EJECUCION
-            y estado_ia["fallos_seguidos"] < MAX_FALLOS_SEGUIDOS
+            and estado_ia["fallos_seguidos"] < MAX_FALLOS_SEGUIDOS
         )
 
-        si no puede_llamar:
+        if not puede_llamar:
             cola_restante.extend(cola[posicion:])
-            romper
+            break
 
         if cola[posicion].get("solo"):
-            lote = [cola[posición]]
-        demás:
+            lote = [cola[posicion]]
+        else:
             lote = []
 
-            para candidata en cola[
+            for candidata in cola[
                 posicion:posicion + NOTAS_POR_LLAMADA
             ]:
-                si candidata.get("solo"):
-                    romper
+                if candidata.get("solo"):
+                    break
 
                 lote.append(candidata)
 
-        posición += len(lote)
+        posicion += len(lote)
 
         notas, bloqueado = pedir_a_gemini(lote)
 
         resultados = {}
 
-        para nota en notas o []:
-            si no es una instancia(nota, dict):
-                continuar
+        for nota in notas or []:
+            if not isinstance(nota, dict):
+                continue
 
-            intentar:
-                resultados[int(nota.get("índice"))] = nota
-            excepto (TypeError, ValueError):
-                aprobar
+            try:
+                resultados[int(nota.get("indice"))] = nota
+            except (TypeError, ValueError):
+                pass
 
-        para i, pendiente en enumerate(lote, start=1):
-            si bloqueado:
-                Si len(lote) == 1:
-                    imprimir(
-                        "Géminis bloqueó la nota; se descarta: "
+        for i, pendiente in enumerate(lote, start=1):
+            if bloqueado:
+                if len(lote) == 1:
+                    print(
+                        "Gemini bloqueó la nota; se descarta: "
                         f"{pendiente['title'][:80]}"
                     )
-                demás:
-                    pendiente["solo"] = Verdadero
+                else:
+                    pendiente["solo"] = True
                     cola_restante.append(pendiente)
 
-                continuar
+                continue
 
             noticia = preparar_noticia(
                 resultados.get(i),
                 pendiente,
             )
 
-            si noticia:
+            if noticia:
                 noticias.append(noticia)
 
-                urls_publicadas.add(pendiente["origenUrl"])
-                títulos_publicados.add(
-                    noticia["título"].casefold()
+                urls_publicadas.add(pendiente["sourceUrl"])
+                titulos_publicados.add(
+                    noticia["title"].casefold()
                 )
                 ids_publicados.add(str(noticia["id"]))
 
                 publicadas_ahora += 1
-                continuar
+                continue
 
-            si no estado_ia["cuota_agotada"]:
+            if not estado_ia["cuota_agotada"]:
                 pendiente["intentos"] = (
                     int(pendiente.get("intentos", 0)) + 1
                 )
 
                 if pendiente["intentos"] >= MAX_INTENTOS_NOTA:
-                    imprimir(
+                    print(
                         "Se descarta tras varios intentos: "
                         f"{pendiente['title'][:80]}"
                     )
-                    continuar
+                    continue
 
             cola_restante.append(pendiente)
 
     # 5. Limpiar cola y ordenar noticias.
     cola_restante = [
         pendiente
-        para pendiente en cola_restante
-        si pendiente.get("sourceUrl") no está en urls_publicadas
+        for pendiente in cola_restante
+        if pendiente.get("sourceUrl") not in urls_publicadas
     ][:MAX_COLA]
 
     noticias.sort(
-        clave=lambda noticia: noticia.get("publicadoEn", ""),
-        reverso=Verdadero,
+        key=lambda noticia: noticia.get("publishedAt", ""),
+        reverse=True,
     )
 
     # Si no quedan noticias válidas, intentar conservar las anteriores
     # en vez de reemplazar news.json por una lista vacía.
-    si no noticias y anteriores:
+    if not noticias and anteriores:
         conservadas = [
             noticia
-            para noticias en anteriores
-            si isinstance(noticia, dict)
-            y no es_noticia_demo(noticia)
+            for noticia in anteriores
+            if isinstance(noticia, dict)
+            and not es_noticia_demo(noticia)
         ]
 
-        si conservadas:
-            imprimir(
+        if conservadas:
+            print(
                 "No hay noticias nuevas válidas; "
                 "se conserva el contenido anterior."
             )
@@ -831,24 +831,24 @@ def ejecutar():
 
     # Guardar usando archivos temporales para evitar escrituras parciales.
     guardar_json(
-        RUTA_DE_ARCHIVO_DE_NOTICIAS,
+        NEWS_FILE_PATH,
         noticias[:MAX_NOTICIAS],
     )
 
     guardar_json(
-        RUTA_DE_ARCHIVO_PENDIENTE,
+        PENDING_FILE_PATH,
         cola_restante,
     )
 
-    imprimir(
+    print(
         f"Proceso terminado: {publicadas_ahora} noticias nuevas; "
         f"{len(cola_restante)} en cola; "
         f"{min(len(noticias), MAX_NOTICIAS)} publicadas; "
-        f"{estado_ia['llamadas']} llama a Gemini"
+        f"{estado_ia['llamadas']} llamadas a Gemini"
         + (
             "; cuota agotada."
-            si estado_ia["cuota_agotada"]
-            demás "."
+            if estado_ia["cuota_agotada"]
+            else "."
         )
     )
 
