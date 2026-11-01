@@ -8,18 +8,7 @@
     "category": "Mundo",
     "imageUrl": "https://static01.nyt.com/images/2026/10/27/multimedia/00biz-obamacare--mlbk/00biz-obamacare--mlbk-mediumSquareAt3X.jpg",
     "rawText": "Premiums will increase an average 13 percent next year for millions of Americans, on top of an earlier steep increase. It adds to the problems facing the program, which the Trump administration has weakened.",
-    "intentos": 0
-  },
-  {
-    "id": "2dd959490d3ebd6f",
-    "title": "This Device Uses A.I. and Lasers to Kill Mosquitoes",
-    "source": "NYT > Technology",
-    "sourceUrl": "https://www.nytimes.com/video/technology/100000011221955/ai-lasers-mosquitoes.html",
-    "publishedAt": "2026-10-30T11:12:48+00:00",
-    "category": "Tecnología",
-    "imageUrl": "https://static01.nyt.com/images/2026/10/19/arts/rv-ai-mosquitos-final-v3/rv-ai-mosquitos-final-v3-mediumSquareAt3X.jpg",
-    "rawText": "A Chinese start-up has developed a device that uses artificial intelligence and lasers to kill mosquitoes. But there are safety concerns for people and other creatures nearby when the device is in action.",
-    "intentos": 2
+    "intentos": 1
   },
   {
     "id": "31bb82931ece4a7e",
