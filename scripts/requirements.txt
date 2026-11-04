@@ -2,3 +2,4 @@ feedparser>=6.0
 trafilatura
 requests
 google-generativeai
+groq
