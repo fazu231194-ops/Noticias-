@@ -28,7 +28,7 @@ else:
     gemini_model = None
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
-MODELO_GROQ = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
+MODELO_GROQ = os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b")
 
 if GROQ_API_KEY:
     groq_client = Groq(api_key=GROQ_API_KEY, timeout=60.0)
@@ -118,7 +118,7 @@ PROMPT = """Sos periodista y editor de Panorama Global News.
 Recibís __CANTIDAD__ notas de origen. Para CADA una, redactá una nota
 periodística original en español, clara y útil para el lector.
 
-REGLAS OBLIGATORIAS:
+REGLAS OBLIGATORIAS PARA EL CUERPO DE LA NOTA:
 - Objetivo: entre 500 y 800 palabras por artículo. Priorizá el desarrollo
   del tema por sobre la extensión exacta.
 - No rellenes ni repitas ideas para alcanzar la extensión. Si la fuente no
@@ -133,12 +133,20 @@ REGLAS OBLIGATORIAS:
 - Texto plano, con párrafos separados por una línea en blanco. Sin markdown,
   asteriscos, numerales ni viñetas. Ignorá menús, publicidad y enlaces relacionados.
 
+ADEMÁS, AL FINAL DEL ARTÍCULO, agregá un párrafo aparte (separado por una
+línea en blanco) que empiece con "Por qué importa: " y después, en 3 a 5
+líneas, dé tu propia lectura editorial del hecho: qué conecta con otros
+sucesos recientes, qué efectos puede tener, o qué conviene seguir mirando
+a futuro. Esta parte debe ser un análisis con mirada propia, no un resumen
+de lo ya dicho ni datos nuevos no confirmados. Si la noticia es muy menor
+o no da pie a un análisis real, podés omitir este párrafo.
+
 Elegí "categoria" entre: Mundo, Sociedad, Economía, Tecnología, Deportes, Ciencia.
 
 Devolvé SOLO JSON válido, sin texto antes ni después:
 {"notas":[{"indice":1,"titulo":"título en español, máximo 120 caracteres",
 "resumen":"1 o 2 oraciones, máximo 200 caracteres","categoria":"categoría válida",
-"articulo":"nota completa en texto plano"}]}
+"articulo":"nota completa en texto plano, incluyendo el párrafo final de Por qué importa"}]}
 Incluí una entrada por nota con el mismo número de indice.
 
 __NOTAS__
@@ -328,7 +336,6 @@ def pedir_a_gemini(lote):
                     continue
                 return None, "error_temporal"
 
-            # Timeout u otro error puntual de Gemini.
             return None, "error_temporal"
 
     return None, "error_temporal"
@@ -379,7 +386,6 @@ def pedir_a_groq(lote):
             print("Cuota DIARIA de Groq agotada.")
             return None, "quota_dia"
 
-        # Límite por minuto, timeout, modelo inválido, etc.: se reintenta en otra ejecución.
         return None, "error_temporal"
 
 
@@ -394,7 +400,6 @@ def pedir_redaccion(lote):
     if estado == "ok" or estado == "bloqueado":
         return notas, estado
 
-    # Gemini no pudo (cuota diaria, límite de la ejecución, o error puntual): probamos Groq.
     notas, estado_groq_resultado = pedir_a_groq(lote)
     return notas, estado_groq_resultado
 
@@ -666,7 +671,6 @@ def ejecutar():
             fallos_seguidos += 1
 
         if estado == "quota_dia":
-            # Ninguna de las dos IA pudo: el lote vuelve entero a la cola.
             cola_restante.extend(lote)
             continue
 
