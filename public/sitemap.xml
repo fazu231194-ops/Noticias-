@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://noticiasnoticiasglobales.pages.dev/</loc><lastmod>2026-11-14T05:12:43+00:00</lastmod><changefreq>hourly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://noticiasnoticiasglobales.pages.dev/</loc><lastmod>2026-11-14T10:10:50+00:00</lastmod><changefreq>hourly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/dba8fbf00e3b6d03</loc><lastmod>2026-11-14T10:10:50+00:00</lastmod></url>
+  <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/42019767f1140b5b</loc><lastmod>2026-11-14T06:54:50+00:00</lastmod></url>
+  <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/8ef485d0c289751e</loc><lastmod>2026-11-14T06:19:04+00:00</lastmod></url>
   <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/aad7b0950b82d5ae</loc><lastmod>2026-11-14T05:12:43+00:00</lastmod></url>
+  <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/c9835daa8f363895</loc><lastmod>2026-11-14T05:05:00+00:00</lastmod></url>
   <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/45b9cdfaa4a1eb48</loc><lastmod>2026-11-14T05:01:06+00:00</lastmod></url>
+  <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/f83a676d74f090b7</loc><lastmod>2026-11-14T04:44:21+00:00</lastmod></url>
+  <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/b2c4de1a8ab84544</loc><lastmod>2026-11-14T03:47:55+00:00</lastmod></url>
+  <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/2b9afcbe9fec16df</loc><lastmod>2026-11-14T01:22:56+00:00</lastmod></url>
   <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/64bdf51095001d71</loc><lastmod>2026-11-14T01:10:39+00:00</lastmod></url>
   <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/39021b880fde2e34</loc><lastmod>2026-11-14T01:09:14+00:00</lastmod></url>
   <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/518e63cb207b22df</loc><lastmod>2026-11-14T01:04:25+00:00</lastmod></url>
@@ -11,6 +18,7 @@
   <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/c3fa93e6e7a98daf</loc><lastmod>2026-11-13T23:10:21+00:00</lastmod></url>
   <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/e3ce95dff4c8a1e2</loc><lastmod>2026-11-13T22:46:15+00:00</lastmod></url>
   <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/9fcd846bc3c855e3</loc><lastmod>2026-11-13T22:36:46+00:00</lastmod></url>
+  <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/c48692d8c975fd0f</loc><lastmod>2026-11-13T21:28:58+00:00</lastmod></url>
   <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/cf79dffbe8042217</loc><lastmod>2026-11-13T18:58:56+00:00</lastmod></url>
   <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/3dc626ea28ff3a7d</loc><lastmod>2026-11-13T18:40:30+00:00</lastmod></url>
   <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/3bf2cbe7ba32d632</loc><lastmod>2026-11-13T18:10:41+00:00</lastmod></url>
@@ -197,8 +205,4 @@
   <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/9a3500d6fef8303a</loc><lastmod>2026-11-07T17:00:00+00:00</lastmod></url>
   <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/131c7319af2c42f1</loc><lastmod>2026-11-07T16:00:00+00:00</lastmod></url>
   <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/c2be7bf5e56120e2</loc><lastmod>2026-11-07T14:01:52+00:00</lastmod></url>
-  <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/855ef212f5d021fa</loc><lastmod>2026-11-07T12:00:00+00:00</lastmod></url>
-  <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/6e9aefbf131bd483</loc><lastmod>2026-11-07T10:59:54+00:00</lastmod></url>
-  <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/ff1dac315f6a26ce</loc><lastmod>2026-11-07T10:00:00+00:00</lastmod></url>
-  <url><loc>https://noticiasnoticiasglobales.pages.dev/noticia/fdf976200597a155</loc><lastmod>2026-11-07T09:36:02+00:00</lastmod></url>
 </urlset>
